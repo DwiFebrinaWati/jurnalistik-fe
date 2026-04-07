@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('register');
 });
 
 Route::get('/register', function () {
@@ -43,5 +43,5 @@ Route::get('/author/artikel', function () {
 })->name('author.artikel');
 
 Route::get('/editor/artikel', function () {
-    return view('editor.artikel'); 
+    return view('editor.artikel');
 })->name('editor.artikel');
