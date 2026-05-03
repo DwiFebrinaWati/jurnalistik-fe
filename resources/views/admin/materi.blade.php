@@ -258,24 +258,145 @@
 </div>
 
 <script>
-    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+    const API_URL = 'https://jurnalsmandas.web.id/api/materi';
+    const TOKEN = localStorage.getItem('access_token');
+    let currentCategory = 'Fotografi';
+
+    if (!TOKEN) {
+        window.location.href = "login.html";
+    }
 
     function switchTab(element) {
         document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
         element.classList.add('active');
+
+        currentCategory = element.innerText;
+        loadMateri();
     }
 
-    function openEditModal(judul, desk, link) {
-        document.getElementById('edit-judul').value = judul;
-        document.getElementById('edit-deskripsi').value = desk;
-        document.getElementById('edit-link').value = link;
+    async function loadMateri() {
+        try {
+            const response = await fetch(`${API_URL}?kategori=${currentCategory}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' }
+            });
+            const result = await response.json();
+            const tableBody = document.querySelector('tbody');
+            tableBody.innerHTML = ''; 
+
+            const filteredData = result.data.filter(item => item.kategori === currentCategory);
+
+            filteredData.forEach((item, index) => {
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
+                        <td>${item.judul}</td>
+                        <td>${item.deskripsi}</td>
+                        <td><a href="${item.link}" target="_blank" class="link-text">${item.link}</a></td>
+                        <td>
+                            <button class="btn-action btn-edit" onclick='prepareEdit(${JSON.stringify(item).replace(/'/g, "&apos;")})'>Edit</button>
+                            <button class="btn-action btn-hapus" onclick="prepareDelete(${item.id})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Gagal memuat materi:", error);
+        }
+    }
+
+    async function handleTambah() {
+        const payload = {
+            judul: document.querySelector('#modalTambah input[placeholder="Judul Materi"]').value,
+            deskripsi: document.querySelector('#modalTambah textarea').value,
+            link: document.querySelector('#modalTambah input[placeholder="Link Materi"]').value,
+            kategori: currentCategory // Otomatis masuk ke kategori yang sedang aktif
+        };
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert("Materi berhasil ditambah ke kategori " + currentCategory);
+                hideModal('modalTambah');
+                loadMateri();
+            }
+        } catch (error) { alert("Gagal menambah data"); }
+    }
+    document.querySelector('#modalTambah .btn-save').onclick = handleTambah;
+
+    let selectedId = null;
+    function prepareEdit(item) {
+        selectedId = item.id;
+        document.getElementById('edit-judul').value = item.judul;
+        document.getElementById('edit-deskripsi').value = item.deskripsi;
+        document.getElementById('edit-link').value = item.link;
         showModal('modalEdit');
     }
 
-    window.onclick = function(event) {
-        if (event.target.className === 'modal') event.target.style.display = 'none';
+    async function handleEdit() {
+        const payload = {
+            judul: document.getElementById('edit-judul').value,
+            deskripsi: document.getElementById('edit-deskripsi').value,
+            link: document.getElementById('edit-link').value,
+            kategori: currentCategory
+        };
+
+        try {
+            const res = await fetch(`${API_URL}/${selectedId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+            if (res.ok) {
+                alert("Materi berhasil diupdate");
+                hideModal('modalEdit');
+                loadMateri();
+            }
+        } catch (error) { alert("Gagal update data"); }
     }
+    document.querySelector('#modalEdit .btn-save').onclick = handleEdit;
+
+    let deleteId = null;
+    function prepareDelete(id) {
+        deleteId = id;
+        showModal('modalHapus');
+    }
+
+    async function confirmDelete() {
+        try {
+            const res = await fetch(`${API_URL}/${deleteId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            if (res.ok) {
+                hideModal('modalHapus');
+                loadMateri();
+            }
+        } catch (error) { alert("Gagal menghapus data"); }
+    }
+    document.querySelector('#modalHapus .btn-save').onclick = confirmDelete;
+
+    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    document.querySelector('.btn-logout').onclick = () => {
+        localStorage.removeItem('access_token');
+        window.location.href = "login.html";
+    };
+
+    loadMateri();
 </script>
 
 </body>

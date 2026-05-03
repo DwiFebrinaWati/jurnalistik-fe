@@ -210,37 +210,125 @@
 </div>
 
 <script>
-    let currentTab = 'diterima';
+    const API_URL = 'https://jurnalsmandas.web.id/api/artikel';
+    const TOKEN = localStorage.getItem('access_token');
+    let currentTab = 'diterima'; // Default tab
+
+    if (!TOKEN) {
+        window.location.href = "login.html";
+    }
+
+    async function loadArtikel() {
+        try {
+            const response = await fetch(`${API_URL}?status=${currentTab}`, {
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await response.json();
+
+            const container = document.getElementById('artikel-container');
+            container.innerHTML = ''; // Kosongkan dummy data
+
+            if (result.data.length === 0) {
+                container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #9ca3af; padding: 20px;">Tidak ada artikel dengan status ${currentTab}.</p>`;
+                return;
+            }
+
+            result.data.forEach(artikel => {
+                // Gunakan gambar default jika artikel.gambar kosong
+                const gambar = artikel.gambar || '{{ asset("images/artikel.jpg") }}';
+
+                container.innerHTML += `
+                    <div class="artikel-card" onclick='prepareDetail(${JSON.stringify(artikel).replace(/'/g, "&apos;")})'>
+                        <img src="${gambar}" class="artikel-img" alt="Artikel">
+                        <div class="artikel-body">
+                            <h3>${artikel.judul}</h3>
+                            <div class="artikel-date">🕒 ${artikel.tanggal_dibuat || 'Baru saja'}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (error) {
+            console.error("Gagal mengambil data artikel:", error);
+        }
+    }
 
     function switchTab(tab) {
         currentTab = tab;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        event.target.classList.add('active');
-        // Logika filter data bisa ditaruh di sini
+        // Update UI tombol tab
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            if(btn.innerText.toLowerCase() === tab) btn.classList.add('active');
+        });
+        loadArtikel(); // Reload data sesuai status
     }
 
-    function showDetail(judul, penulis, tanggal, status) {
+    let selectedArtikelId = null;
+
+    function prepareDetail(artikel) {
+        selectedArtikelId = artikel.id;
         document.getElementById('main-list-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
 
-        document.getElementById('det-judul').innerText = judul;
-        document.getElementById('det-penulis').innerText = penulis;
-        document.getElementById('det-tanggal').innerText = tanggal;
+        document.getElementById('det-judul').innerText = artikel.judul;
+        document.getElementById('det-penulis').innerText = artikel.penulis || 'Anonim';
+        document.getElementById('det-tanggal').innerText = artikel.tanggal_dibuat;
+
+        document.querySelector('.detail-content').innerHTML = artikel.konten;
 
         const actionBtn = document.getElementById('btn-main-action');
-        if(status === 'dipublish') {
+        if(currentTab === 'dipublish') {
             actionBtn.innerText = 'Unpublish';
             actionBtn.className = 'btn btn-unpublish';
+            actionBtn.onclick = () => updateStatus('diterima');
         } else {
             actionBtn.innerText = 'Publish';
             actionBtn.className = 'btn btn-action';
+            actionBtn.onclick = () => updateStatus('dipublish');
+        }
+    }
+
+    async function updateStatus(newStatus) {
+        if (!selectedArtikelId) return;
+
+        try {
+            const res = await fetch(`${API_URL}/${selectedArtikelId}/status`, {
+                method: 'PATCH', // Atau 'PUT' sesuai dokumentasi API temanmu
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ status: newStatus })
+            });
+
+            if (res.ok) {
+                alert(`Artikel berhasil di-${newStatus}!`);
+                hideDetail();
+                loadArtikel();
+            } else {
+                alert("Gagal memperbarui status artikel.");
+            }
+        } catch (error) {
+            console.error("Error update status:", error);
         }
     }
 
     function hideDetail() {
         document.getElementById('main-list-view').style.display = 'block';
         document.getElementById('detail-view').style.display = 'none';
+        selectedArtikelId = null;
     }
+
+    document.querySelector('.btn-logout').addEventListener('click', () => {
+        localStorage.removeItem('access_token');
+        window.location.href = "login.html";
+    });
+
+    // Jalankan saat pertama kali buka halaman
+    loadArtikel();
 </script>
 
 </body>

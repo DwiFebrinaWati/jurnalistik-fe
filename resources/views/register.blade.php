@@ -180,5 +180,65 @@
         </div>
     </div>
 
+<script>
+    const REGISTER_URL = 'https://jurnalsmandas.web.id/api/register';
+
+    async function handleRegister(event) {
+        event.preventDefault();
+
+        const name = document.querySelector('input[placeholder="Masukkan Nama Lengkap"]').value;
+        const email = document.querySelector('input[placeholder="Masukkan Email"]').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirm_password').value;
+        const submitBtn = document.querySelector('.btn-submit');
+
+        if (password !== confirmPassword) {
+            alert("Password dan Konfirmasi Password tidak cocok!");
+            return;
+        }
+
+        if (password.length < 8) {
+            alert("Password minimal harus 8 karakter.");
+            return;
+        }
+
+        submitBtn.innerText = "Processing...";
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(REGISTER_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    name: name,
+                    email: email,
+                    password: password,
+                    password_confirmation: confirmPassword
+                })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Registrasi Berhasil! Silakan login untuk melanjutkan.");
+                window.location.href = "login.html";
+            } else {
+                alert(result.message || "Registrasi gagal. Periksa kembali data Anda.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Terjadi kesalahan jaringan.");
+        } finally {
+            submitBtn.innerText = "Create account";
+            submitBtn.disabled = false;
+        }
+    }
+
+    document.querySelector('form').onsubmit = handleRegister;
+</script>
+
 </body>
 </html>

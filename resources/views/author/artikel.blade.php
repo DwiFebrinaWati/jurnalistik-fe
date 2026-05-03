@@ -239,71 +239,145 @@
 </div>
 
 <script>
-    function switchTab(el) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
+    const API_URL = 'https://jurnalsmandas.web.id/api/articles';
+    const TOKEN = localStorage.getItem('access_token');
+    let currentArticleId = null; // Penanda apakah sedang edit atau tambah baru
+    let currentStatus = 'disimpan'; // Default tab
+
+    // Cek Login
+    if (!TOKEN) {
+        window.location.href = "login.html";
     }
 
-    function hideEditor() {
-        document.getElementById('list-view').style.display = 'block';
-        document.getElementById('editor-view').style.display = 'none';
-    }
+    // 1. FUNGSI TAMPILKAN DATA BERDASARKAN STATUS (TAB)
+    async function loadArticles(status = 'disimpan') {
+        currentStatus = status;
+        try {
+            const response = await fetch(`${API_URL}?status=${status}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            const result = await response.json();
+            const grid = document.querySelector('.artikel-grid');
+            grid.innerHTML = '';
 
-    function openTambahEditor() {
-        document.getElementById('list-view').style.display = 'none';
-        document.getElementById('editor-view').style.display = 'block';
-
-        document.getElementById('edit-judul').value = "";
-        document.getElementById('edit-isi').value = "";
-        document.getElementById('preview-box').innerHTML = "<span>+ Upload Photo</span>";
-
-        document.getElementById('edit-author').value = "Ilya Saruni"; // Ambil dari session admin nantinya
-        document.getElementById('edit-tanggal').value = new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' });
-    }
-
-    function openEditEditor(btn) {
-        const card = btn.closest('.artikel-card');
-
-        const judul = card.querySelector('.data-judul').innerText;
-        const penulis = card.querySelector('.data-penulis').innerText;
-        const tanggal = card.querySelector('.data-tgl').innerText;
-        const imgSrc = card.querySelector('.data-img').src;
-
-        document.getElementById('edit-judul').value = judul;
-        document.getElementById('edit-author').value = penulis;
-        document.getElementById('edit-tanggal').value = tanggal;
-        document.getElementById('preview-box').innerHTML = `<img src="${imgSrc}">`;
-        document.getElementById('edit-isi').value = "Ambil dari database";
-
-        document.getElementById('list-view').style.display = 'none';
-        document.getElementById('editor-view').style.display = 'block';
-    }
-
-    function previewFile(input) {
-        const box = document.getElementById('preview-box');
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                box.innerHTML = `<img src="${e.target.result}">`;
-            }
-            reader.readAsDataURL(input.files[0]);
+            result.data.forEach(art => {
+                grid.innerHTML += `
+                    <div class="artikel-card">
+                        <div class="artikel-img-box">
+                            <img src="${art.image_url || '/images/artikel.jpg'}" class="data-img">
+                        </div>
+                        <div class="artikel-body">
+                            <h3 class="data-judul">${art.title}</h3>
+                            <div class="artikel-meta-data">
+                                🕒 <span class="data-tgl">${art.date}</span> | ✍️ <span class="data-penulis">${art.author_name}</span>
+                            </div>
+                            <div class="card-actions">
+                                ${status === 'disimpan' || status === 'ditolak' ?
+                                    `<button class="btn-card btn-edit" onclick="openEditEditor(${art.id})">Edit</button>` :
+                                    `<button class="btn-card btn-edit" style="background:#eee; color:#999; border:none;" disabled>Terkunci</button>`
+                                }
+                                <button class="btn-card btn-hapus" onclick="confirmDelete(${art.id})">Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (error) {
+            console.error("Gagal memuat artikel:", error);
         }
     }
 
-    function confirmDelete() {
-        document.getElementById('modalHapus').style.display = 'flex';
-    }
-    function closeDelete() {
-        document.getElementById('modalHapus').style.display = 'none';
-    }
-    function executeDelete() {
-        alert("Artikel berhasil dihapus!"); // Logika hapus backend di sini
-        closeDelete();
+    function switchTab(el) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        const status = el.innerText.toLowerCase();
+        loadArticles(status);
     }
 
-    window.onclick = function(event) {
-        if (event.target.className === 'modal') closeDelete();
+    async function handleSave(isSubmit = false) {
+        const title = document.getElementById('edit-judul').value;
+        const content = document.getElementById('edit-isi').value;
+        const fileInput = document.getElementById('file-input');
+
+        // Gunakan FormData karena ada upload gambar
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('content', content);
+        formData.append('status', isSubmit ? 'dikirim' : 'disimpan');
+
+        if (fileInput.files[0]) {
+            formData.append('image', fileInput.files[0]);
+        }
+
+        const method = currentArticleId ? 'POST' : 'POST';
+        if (currentArticleId) formData.append('_method', 'PUT');
+
+        const url = currentArticleId ? `${API_URL}/${currentArticleId}` : API_URL;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}` },
+                body: formData
+            });
+
+            if (response.ok) {
+                alert(isSubmit ? "Artikel berhasil dikirim ke Editor!" : "Artikel disimpan di draf.");
+                hideEditor();
+                loadArticles(currentStatus);
+            }
+        } catch (error) {
+            alert("Gagal menyimpan artikel.");
+        }
     }
+
+    document.querySelector('.btn-submit').onclick = () => handleSave(true);
+    document.querySelector('.btn-save').innerHTML = "Simpan Draf";
+    document.querySelector('.btn-save').onclick = () => handleSave(false);
+
+    async function openEditEditor(id) {
+        currentArticleId = id;
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            const art = await response.json();
+
+            document.getElementById('edit-judul').value = art.title;
+            document.getElementById('edit-isi').value = art.content;
+            document.getElementById('edit-author').value = art.author_name;
+            document.getElementById('edit-tanggal').value = art.date;
+            document.getElementById('preview-box').innerHTML = `<img src="${art.image_url}">`;
+
+            document.getElementById('list-view').style.display = 'none';
+            document.getElementById('editor-view').style.display = 'block';
+        } catch (error) {
+            alert("Gagal mengambil detail artikel");
+        }
+    }
+
+    let deleteId = null;
+    function confirmDelete(id) {
+        deleteId = id;
+        document.getElementById('modalHapus').style.display = 'flex';
+    }
+
+    async function executeDelete() {
+        try {
+            const response = await fetch(`${API_URL}/${deleteId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            if (response.ok) {
+                closeDelete();
+                loadArticles(currentStatus);
+            }
+        } catch (error) {
+            alert("Gagal menghapus");
+        }
+    }
+
+    loadArticles();
 </script>
 
 </body>

@@ -372,12 +372,120 @@
 </div>
 
 <script>
-    function showModal(id) {
-        document.getElementById(id).style.display = 'flex';
+    const API_URL = 'https://jurnalsmandas.web.id/api/users';
+    const TOKEN = localStorage.getItem('access_token');
+
+    if (!TOKEN) {
+        window.location.href = "login.html";
     }
-    function hideModal(id) {
-        document.getElementById(id).style.display = 'none';
+
+    async function loadUsers() {
+        try {
+            const response = await fetch(API_URL, {
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Accept': 'application/json'
+                }
+            });
+            const result = await response.json();
+            const tableBody = document.querySelector('tbody');
+            tableBody.innerHTML = ''; // Bersihkan data dummy
+
+            result.data.forEach((user, index) => {
+                const badgeClass = user.role.toLowerCase() === 'editor' ? 'badge-editor' : 'badge-author';
+
+                tableBody.innerHTML += `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td><span class="badge ${badgeClass}">${user.role}</span></td>
+                        <td class="actions">
+                            <button class="btn-action btn-edit" onclick='prepareEdit(${JSON.stringify(user)})'>Edit</button>
+                            <button class="btn-action btn-hapus" onclick="prepareDelete(${user.id})">Hapus</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (error) {
+            console.error("Gagal memuat data pengguna:", error);
+        }
     }
+
+    let selectedUserId = null;
+
+    function prepareEdit(user) {
+        selectedUserId = user.id;
+        const modal = document.getElementById('modalEdit');
+        modal.querySelector('input[type="text"]').value = user.name;
+        modal.querySelector('input[type="email"]').value = user.email;
+        modal.querySelector('select').value = user.role;
+
+        modal.querySelector('input[type="text"]').readOnly = true;
+        modal.querySelector('input[type="email"]').readOnly = true;
+
+        showModal('modalEdit');
+    }
+
+    async function handleUpdateRole() {
+        const newRole = document.querySelector('#modalEdit select').value;
+
+        try {
+            const res = await fetch(`${API_URL}/${selectedUserId}`, {
+                method: 'PUT',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ role: newRole })
+            });
+
+            if (res.ok) {
+                alert("Role pengguna berhasil diperbarui!");
+                hideModal('modalEdit');
+                loadUsers();
+            }
+        } catch (error) {
+            alert("Gagal memperbarui role");
+        }
+    }
+    // Pasang fungsi ke tombol simpan di modal edit
+    document.querySelector('#modalEdit .btn-simpan').onclick = handleUpdateRole;
+
+    let deleteUserId = null;
+
+    function prepareDelete(id) {
+        deleteUserId = id;
+        showModal('modalHapus');
+    }
+
+    async function confirmDelete() {
+        try {
+            const res = await fetch(`${API_URL}/${deleteUserId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+
+            if (res.ok) {
+                hideModal('modalHapus');
+                loadUsers();
+            }
+        } catch (error) {
+            alert("Gagal menghapus pengguna");
+        }
+    }
+    document.querySelector('#modalHapus .btn-simpan').onclick = confirmDelete;
+
+    document.querySelector('.btn-logout').onclick = () => {
+        localStorage.removeItem('access_token');
+        window.location.href = "login.html";
+    };
+
+    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    loadUsers();
 </script>
 
 </body>

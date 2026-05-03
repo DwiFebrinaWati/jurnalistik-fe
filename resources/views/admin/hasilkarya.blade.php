@@ -258,36 +258,149 @@
 </div>
 
 <script>
-    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+    const API_URL = 'https://jurnalsmandas.web.id/api/hasil-karya'; // Sesuaikan endpoint temanmu
+    const TOKEN = localStorage.getItem('access_token');
 
-    function openEditModal(button) {
-        const card = button.closest('.karya-card');
-        const judul = card.querySelector('.data-judul').innerText;
-        const link = card.querySelector('.data-link').getAttribute('href');
-        const coverBy = card.querySelector('.data-coverby').innerText;
+    if (!TOKEN) {
+        window.location.href = "login.html";
+    }
 
-        document.getElementById('edit-judul').value = judul;
-        document.getElementById('edit-link').value = link;
-        document.getElementById('edit-coverby').value = coverBy;
+    async function loadKarya() {
+        try {
+            const response = await fetch(API_URL, {
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' }
+            });
+            const result = await response.json();
+            const grid = document.querySelector('.karya-grid');
+            grid.innerHTML = '';
 
+            result.data.forEach(item => {
+                const cover = item.cover || '{{ asset("images/hasilkarya.jpg") }}';
+                grid.innerHTML += `
+                    <div class="karya-card">
+                        <div class="karya-img-box">
+                            <img src="${cover}" alt="Karya">
+                        </div>
+                        <div class="karya-info">
+                            <div>
+                                <h3 class="data-judul">${item.judul}</h3>
+                                <div class="karya-meta">
+                                    <span>📅 ${item.created_at || 'Baru saja'}</span>
+                                    <a href="${item.link}" target="_blank" class="karya-link data-link">🔗 ${item.link}</a>
+                                    <span>✍️ Cover by: <span class="data-coverby">${item.cover_by}</span></span>
+                                </div>
+                            </div>
+                            <div class="card-actions">
+                                <button class="btn-action btn-edit" onclick='prepareEdit(${JSON.stringify(item).replace(/'/g, "&apos;")})'>Edit</button>
+                                <button class="btn-action btn-hapus" onclick="prepareDelete(${item.id})">Hapus</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (error) { console.error("Gagal load karya", error); }
+    }
+
+    async function handleTambah(e) {
+        const formData = new FormData();
+        formData.append('judul', document.querySelector('#modalTambah input[placeholder="Masukkan judul"]').value);
+        formData.append('link', document.querySelector('#modalTambah input[placeholder="Masukkan link drive"]').value);
+        formData.append('cover_by', document.querySelector('#modalTambah input[placeholder="Nama pembuat cover"]').value);
+
+        const fileInput = document.getElementById('fileTambah');
+        if (fileInput.files[0]) formData.append('cover', fileInput.files[0]);
+
+        try {
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' },
+                body: formData
+            });
+            if (res.ok) {
+                alert("Karya berhasil ditambahkan!");
+                hideModal('modalTambah');
+                loadKarya();
+            }
+        } catch (error) { alert("Gagal menambah karya"); }
+    }
+    document.querySelector('#modalTambah .btn-save').onclick = handleTambah;
+
+    let selectedKaryaId = null;
+
+    function prepareEdit(item) {
+        selectedKaryaId = item.id;
+        document.getElementById('edit-judul').value = item.judul;
+        document.getElementById('edit-link').value = item.link;
+        document.getElementById('edit-coverby').value = item.cover_by;
+        document.getElementById('previewEdit').innerHTML = `<img src="${item.cover}" style="max-height:80px; margin-bottom:10px; border-radius:5px;"><span>Klik untuk ubah</span>`;
         showModal('modalEdit');
     }
+
+    async function handleEdit() {
+        const formData = new FormData();
+        formData.append('_method', 'PUT');
+        formData.append('judul', document.getElementById('edit-judul').value);
+        formData.append('link', document.getElementById('edit-link').value);
+        formData.append('cover_by', document.getElementById('edit-coverby').value);
+
+        const fileInput = document.getElementById('fileEdit');
+        if (fileInput.files[0]) formData.append('cover', fileInput.files[0]);
+
+        try {
+            const res = await fetch(`${API_URL}/${selectedKaryaId}`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' },
+                body: formData
+            });
+            if (res.ok) {
+                alert("Karya berhasil diupdate!");
+                hideModal('modalEdit');
+                loadKarya();
+            }
+        } catch (error) { alert("Gagal update karya"); }
+    }
+    document.querySelector('#modalEdit .btn-save').onclick = handleEdit;
+
+    let deleteId = null;
+    function prepareDelete(id) {
+        deleteId = id;
+        showModal('modalHapus');
+    }
+
+    async function confirmDelete() {
+        try {
+            const res = await fetch(`${API_URL}/${deleteId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' }
+            });
+            if (res.ok) {
+                hideModal('modalHapus');
+                loadKarya();
+            }
+        } catch (error) { alert("Gagal menghapus"); }
+    }
+    document.querySelector('#modalHapus .btn-save').onclick = confirmDelete;
+
+    document.querySelector('.btn-logout').onclick = () => {
+        localStorage.removeItem('access_token');
+        window.location.href = "login.html";
+    };
+
+    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
 
     function previewImg(input, targetId) {
         const preview = document.getElementById(targetId);
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = function(e) {
-                preview.innerHTML = `<img src="${e.target.result}" style="max-height:80px; margin-bottom:10px; border-radius:5px;"><span>Ubah Foto</span>`;
-            }
+            reader.onload = (e) => {
+                preview.innerHTML = `<img src="${e.target.result}" style="max-height:80px; margin-bottom:10px; border-radius:5px;"><span>Ganti Foto</span>`;
+            };
             reader.readAsDataURL(input.files[0]);
         }
     }
 
-    window.onclick = function(event) {
-        if (event.target.className === 'modal') event.target.style.display = 'none';
-    }
+    loadKarya();
 </script>
 
 </body>

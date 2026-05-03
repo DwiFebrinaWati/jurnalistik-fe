@@ -93,18 +93,8 @@
             transition: 0.3s;
         }
 
-        input.email-active {
+        input:focus {
             border: 2px solid #333;
-        }
-
-        .eye-icon {
-            position: absolute;
-            right: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            color: #ccc;
-            font-size: 18px;
         }
 
         /* Tombol Login */
@@ -124,6 +114,11 @@
 
         .btn-login:hover {
             background-color: #168a65;
+        }
+
+        .btn-login:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
         }
 
         .footer-text {
@@ -146,45 +141,82 @@
         <div class="login-card">
             <h2>Login to your account</h2>
 
-            <form action="#">
+            <form id="login-form">
                 <div class="input-group">
                     <label>Email</label>
                     <div class="input-wrapper">
-                        <input type="email" placeholder="Masukkan email anda">
+                        <input type="email" id="email" placeholder="Masukkan email anda" required>
                     </div>
                 </div>
 
                 <div class="input-group">
                     <div class="label-flex">
                         <label>Password</label>
-                        <a href="{{ route('password.request') }}" class="forgot-link">Forgot</a>
+                        <a href="#" class="forgot-link">Forgot</a>
                     </div>
                     <div class="input-wrapper">
-                        <input type="password" id="login-pass" placeholder="Masukkan password anda">
+                        <input type="password" id="login-pass" placeholder="Masukkan password anda" required>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-login">Login</button>
+                <button type="submit" id="btn-submit" class="btn-login">Login</button>
             </form>
 
             <p class="footer-text">
-                Don't Have An Account ? <a href="{{ route('register') }}">Sign Up</a>
+                Don't Have An Account ? <a href="#">Sign Up</a>
             </p>
         </div>
     </div>
 
     <script>
-        function togglePass() {
-            const input = document.getElementById('login-pass');
-            const icon = event.target;
-            if (input.type === "password") {
-                input.type = "text";
-                icon.textContent = "🙈";
-            } else {
-                input.type = "password";
-                icon.textContent = "👁️";
+        const loginForm = document.getElementById('login-form');
+        const btnSubmit = document.getElementById('btn-submit');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('login-pass').value;
+
+            // Loading State
+            btnSubmit.innerText = "Processing...";
+            btnSubmit.disabled = true;
+
+            try {
+                const response = await fetch('https://jurnalsmandas.web.id/api/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json' // Memberitahu Laravel ini request API
+                    },
+                    body: JSON.stringify({
+                        email: email,
+                        password: password
+                    })
+                });
+
+                const result = await response.json();
+                console.log("Raw Response:", result);
+
+                if (response.ok && result.data && result.data.token) {
+                    localStorage.setItem('access_token', result.data.token);
+
+                    alert("Berhasil Login!");
+
+                    window.location.href = "articles.html";
+                } else {
+                    const errorMsg = result.message || "Email atau password salah.";
+                    alert("Gagal Login: " + errorMsg);
+                }
+
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                alert("Koneksi gagal! Pastikan server aktif dan internet lancar.");
+            } finally {
+                btnSubmit.innerText = "Login";
+                btnSubmit.disabled = false;
             }
-        }
+        });
     </script>
 </body>
 </html>

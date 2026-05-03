@@ -126,5 +126,47 @@
         </div>
     </div>
 
+<script>
+    const FORGOT_PASSWORD_URL = 'https://jurnalsmandas.web.id/api/forgot-password';
+
+    async function handleForgotPassword(event) {
+        event.preventDefault();
+
+        const email = document.getElementById('email').value;
+        const submitBtn = document.querySelector('.btn-submit');
+
+        const originalText = submitBtn.innerText;
+        submitBtn.innerText = "Mengirim...";
+        submitBtn.disabled = true;
+
+        try {
+            const response = await fetch(FORGOT_PASSWORD_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ email: email })
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                alert("Link reset password telah dikirim ke email Anda. Silakan cek kotak masuk atau spam.");
+            } else {
+                alert(result.message || "Gagal mengirim email. Pastikan email Anda benar.");
+            }
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Terjadi kesalahan jaringan. Silakan coba lagi nanti.");
+        } finally {
+            submitBtn.innerText = originalText;
+            submitBtn.disabled = false;
+        }
+    }
+
+    document.querySelector('form').onsubmit = handleForgotPassword;
+</script>
+
 </body>
 </html>

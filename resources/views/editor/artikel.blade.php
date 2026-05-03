@@ -207,24 +207,141 @@
 </div>
 
 <script>
-    function openDetail() {
-        document.getElementById('dashboard-view').style.display = 'none';
-        document.getElementById('detail-view').style.display = 'block';
+    const API_URL = 'https://jurnalsmandas.web.id/api/articles';
+    const TOKEN = localStorage.getItem('access_token');
+    let currentArticleId = null;
+    let activeStatus = 'diterima';
+
+    if (!TOKEN) {
+        window.location.href = "login.html";
     }
 
-    function closeDetail() {
-        document.getElementById('dashboard-view').style.display = 'block';
-        document.getElementById('detail-view').style.display = 'none';
+    async function loadArticles(status = 'diterima') {
+        activeStatus = status;
+        try {
+            const response = await fetch(`${API_URL}?status=${status}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            const result = await response.json();
+            const grid = document.querySelector('.artikel-grid');
+            grid.innerHTML = '';
+
+            result.data.forEach(art => {
+                grid.innerHTML += `
+                    <div class="artikel-card" onclick="openDetail(${art.id})">
+                        <img src="${art.image_url || '/images/artikel.jpg'}" class="card-img">
+                        <div class="card-body">
+                            <h3>${art.title}</h3>
+                            <div class="card-meta">🕒 ${art.date} | ✍️ ${art.author_name}</div>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (error) {
+            console.error("Gagal memuat artikel:", error);
+        }
     }
 
     function switchTab(el) {
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
         el.classList.add('active');
+        const status = el.innerText.toLowerCase();
+        loadArticles(status);
+    }
+
+    async function openDetail(id) {
+        currentArticleId = id;
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
+            const art = await response.json();
+
+            document.querySelector('.detail-judul').innerText = art.title;
+            document.querySelector('.detail-meta').innerText = `${art.author_name} | ${art.date}`;
+            document.querySelector('.detail-img').src = art.image_url;
+            document.querySelector('.detail-isi').innerHTML = art.content;
+
+            // Sembunyikan/Tampilkan tombol aksi hanya pada artikel yang "dikirim"
+            const actions = document.querySelector('.detail-actions');
+            actions.style.display = activeStatus === 'dikirim' ? 'flex' : 'none';
+
+            document.getElementById('dashboard-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'block';
+        } catch (error) {
+            alert("Gagal mengambil detail artikel");
+        }
+    }
+
+    async function handleApprove() {
+        if (!confirm("Terima artikel ini?")) return;
+
+        try {
+            const response = await fetch(`${API_URL}/${currentArticleId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ status: 'diterima' })
+            });
+
+            if (response.ok) {
+                alert("Artikel diterima!");
+                closeDetail();
+                loadArticles('dikirim');
+            }
+        } catch (error) {
+            alert("Gagal memproses artikel");
+        }
+    }
+    document.querySelector('.btn-terima').onclick = handleApprove;
+
+    async function handleReject() {
+        const note = document.querySelector('#modalRevisi textarea').value;
+        if (!note) return alert("Alasan penolakan harus diisi!");
+
+        try {
+            const response = await fetch(`${API_URL}/${currentArticleId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: 'ditolak',
+                    revision_note: note
+                })
+            });
+
+            if (response.ok) {
+                alert("Artikel ditolak & dikirim kembali ke Author.");
+                toggleModal(false);
+                closeDetail();
+                loadArticles('dikirim');
+            }
+        } catch (error) {
+            alert("Gagal menolak artikel");
+        }
+    }
+    document.querySelector('#modalRevisi .btn-terima').onclick = handleReject;
+
+    // UI UTILS
+    function closeDetail() {
+        document.getElementById('dashboard-view').style.display = 'block';
+        document.getElementById('detail-view').style.display = 'none';
     }
 
     function toggleModal(show) {
         document.getElementById('modalRevisi').style.display = show ? 'flex' : 'none';
     }
+
+    document.querySelector('.btn-logout').onclick = () => {
+        localStorage.removeItem('access_token');
+        window.location.href = "login.html";
+    };
+
+    loadArticles();
 </script>
 
 </body>
