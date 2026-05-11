@@ -127,6 +127,79 @@
         .btn-logout i {
         margin-right: 8px;
         }
+
+        .modal-overlay {
+        display: none; /* Sembunyi secara default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Kotak Modal */
+    .modal-content {
+        background: white;
+        padding: 40px 60px;
+        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-content h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 30px;
+        font-size: 24px;
+        line-height: 1.3;
+    }
+
+    /* Container Tombol */
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    /* Gaya Tombol Umum */
+    .modal-buttons button {
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
+        min-width: 120px;
+    }
+
+    /* Tombol Kembali (Putih dengan Border Hijau) */
+    .btn-kembali {
+        background: white;
+        color: #10b981;
+        border: 2px solid #10b981;
+    }
+
+    .btn-kembali:hover {
+        background: #f0fdf4;
+    }
+
+    /* Tombol Ya (Hijau Solid) */
+    .btn-ya {
+        background: #10b981; /* Warna Hijau Emerald */
+        color: white;
+        border: none;
+    }
+
+    .btn-ya:hover {
+        background: #059669;
+    }
     </style>
 </head>
 <body>
@@ -152,7 +225,7 @@
             </a>
         </nav>
         <div class="logout-area">
-            <button class="btn-logout">
+            <button class="btn-logout" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
         </div>
@@ -211,6 +284,14 @@
     <div class="modal-content">
         <h2>Tambah Hasil Karya</h2>
         <div class="form-group"><label>Judul</label><input type="text" placeholder="Masukkan judul"></div>
+        <div class="form-group">
+            <label>Kategori</label>
+            <select id="tambah-filetype" style="width: 100%; padding: 14px; border: 1.5px solid #333; border-radius: 12px; outline: none; background: white;">
+                <option value="Fotografi">Fotografi</option>
+                <option value="Videografi">Videografi</option>
+                <option value="Penulisan">Penulisan</option>
+            </select>
+        </div>
         <div class="form-group"><label>Link</label><input type="text" placeholder="Masukkan link drive"></div>
         <div class="form-group"><label>Cover By</label><input type="text" placeholder="Nama pembuat cover"></div>
         <div class="form-group">
@@ -231,6 +312,14 @@
     <div class="modal-content">
         <h2>Edit Hasil Karya</h2>
         <div class="form-group"><label>Judul</label><input type="text" id="edit-judul"></div>
+        <div class="form-group">
+            <label>Kategori</label>
+            <select id="edit-filetype" style="width: 100%; padding: 14px; border: 1.5px solid #333; border-radius: 12px; outline: none; background: white;">
+                <option value="Fotografi">Fotografi</option>
+                <option value="Videografi">Videografi</option>
+                <option value="Penulisan">Penulisan</option>
+            </select>
+        </div>
         <div class="form-group"><label>Link</label><input type="text" id="edit-link"></div>
         <div class="form-group"><label>Cover By</label><input type="text" id="edit-coverby"></div>
         <div class="form-group">
@@ -257,58 +346,93 @@
     </div>
 </div>
 
+<div id="modalLogout" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Apakah Anda yakin ingin keluar akun?</h2>
+        <div class="modal-buttons">
+            <button class="btn-kembali" onclick="closeLogoutModal()">Kembali</button>
+            <button class="btn-ya" onclick="executeLogout()">Ya</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    const API_URL = 'https://jurnalsmandas.web.id/api/hasil-karya'; // Sesuaikan endpoint temanmu
+    // 1. SESUAIKAN URL API LOKAL KAMU
+    const BASE_URL = 'http://127.0.0.1:8000'; // Ganti sesuai port artisan serve kamu
+    const API_URL = `${BASE_URL}/api/works`;
     const TOKEN = localStorage.getItem('access_token');
 
-    if (!TOKEN) {
-        window.location.href = "login.html";
-    }
+    if (!TOKEN) { window.location.href = "login.html"; }
 
+    // Memuat Data
     async function loadKarya() {
+        const grid = document.querySelector('.karya-grid');
+        grid.innerHTML = '<p style="text-align:center; width:100%;">Memuat data...</p>';
+
         try {
             const response = await fetch(API_URL, {
                 headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' }
             });
             const result = await response.json();
-            const grid = document.querySelector('.karya-grid');
-            grid.innerHTML = '';
 
-            result.data.forEach(item => {
-                const cover = item.cover || '{{ asset("images/hasilkarya.jpg") }}';
+            // Controller kamu return langsung array: return response()->json(Work::latest()->get());
+            // Jadi variabel 'result' kemungkinan adalah array langsung
+            const data = Array.isArray(result) ? result : result.data;
+
+            grid.innerHTML = '';
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; width:100%;">Belum ada hasil karya.</p>';
+                return;
+            }
+
+            data.forEach(item => {
+                // Menangani URL Gambar dari Storage Laravel
+                const coverPath = item.cover_image ? `${BASE_URL}/storage/${item.cover_image}` : '/images/default-karya.jpg';
+
                 grid.innerHTML += `
                     <div class="karya-card">
                         <div class="karya-img-box">
-                            <img src="${cover}" alt="Karya">
+                            <img src="${coverPath}" alt="Karya">
                         </div>
                         <div class="karya-info">
                             <div>
-                                <h3 class="data-judul">${item.judul}</h3>
+                                <h3 class="data-judul">${item.title}</h3>
                                 <div class="karya-meta">
-                                    <span>📅 ${item.created_at || 'Baru saja'}</span>
-                                    <a href="${item.link}" target="_blank" class="karya-link data-link">🔗 ${item.link}</a>
-                                    <span>✍️ Cover by: <span class="data-coverby">${item.cover_by}</span></span>
+                                    <span style="display:block; margin-bottom:4px;">🏷️ ${item.fileType}</span>
+                                    <a href="${item.url}" target="_blank" class="karya-link">🔗 Lihat Drive</a>
+                                    <span>✍️ Cover by: <b>${item.cover_by}</b></span>
                                 </div>
                             </div>
                             <div class="card-actions">
-                                <button class="btn-action btn-edit" onclick='prepareEdit(${JSON.stringify(item).replace(/'/g, "&apos;")})'>Edit</button>
-                                <button class="btn-action btn-hapus" onclick="prepareDelete(${item.id})">Hapus</button>
+                                <button class="btn-action btn-edit">Edit</button>
+                                <button class="btn-action btn-hapus" onclick="prepareDelete(${item.work_id})">Hapus</button>
                             </div>
                         </div>
                     </div>
                 `;
+                // Pasang event listener edit (menggunakan work_id sesuai Model kamu)
+                grid.querySelector('.karya-card:last-child .btn-edit').onclick = () => prepareEdit(item);
             });
-        } catch (error) { console.error("Gagal load karya", error); }
+        } catch (error) {
+            grid.innerHTML = '<p style="color:red; text-align:center; width:100%;">Gagal koneksi ke API Lokal.</p>';
+        }
     }
 
-    async function handleTambah(e) {
+    // Tambah Data
+    async function handleTambah() {
         const formData = new FormData();
-        formData.append('judul', document.querySelector('#modalTambah input[placeholder="Masukkan judul"]').value);
-        formData.append('link', document.querySelector('#modalTambah input[placeholder="Masukkan link drive"]').value);
+        // Mapping: Nama di Form -> Nama yang diminta Controller (Request Validate)
+        formData.append('title', document.querySelector('#modalTambah input[placeholder="Masukkan judul"]').value);
+        formData.append('url', document.querySelector('#modalTambah input[placeholder="Masukkan link drive"]').value);
         formData.append('cover_by', document.querySelector('#modalTambah input[placeholder="Nama pembuat cover"]').value);
+        formData.append('fileType', document.getElementById('tambah-filetype').value);
 
         const fileInput = document.getElementById('fileTambah');
-        if (fileInput.files[0]) formData.append('cover', fileInput.files[0]);
+        if (fileInput.files[0]) {
+            formData.append('cover_image', fileInput.files[0]);
+        } else {
+            return alert("Wajib upload foto cover!");
+        }
 
         try {
             const res = await fetch(API_URL, {
@@ -316,39 +440,47 @@
                 headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' },
                 body: formData
             });
+            const resData = await res.json();
+
             if (res.ok) {
-                alert("Karya berhasil ditambahkan!");
+                alert("Karya berhasil disimpan!");
                 hideModal('modalTambah');
                 loadKarya();
+            } else {
+                alert("Gagal: " + (resData.message || "Cek validasi file/input"));
             }
-        } catch (error) { alert("Gagal menambah karya"); }
+        } catch (error) { alert("Koneksi gagal!"); }
     }
-    document.querySelector('#modalTambah .btn-save').onclick = handleTambah;
 
-    let selectedKaryaId = null;
-
+    // Edit Data
+    let selectedId = null;
     function prepareEdit(item) {
-        selectedKaryaId = item.id;
-        document.getElementById('edit-judul').value = item.judul;
-        document.getElementById('edit-link').value = item.link;
+        selectedId = item.work_id; // Menggunakan work_id sesuai Model
+        document.getElementById('edit-judul').value = item.title;
+        document.getElementById('edit-link').value = item.url;
         document.getElementById('edit-coverby').value = item.cover_by;
-        document.getElementById('previewEdit').innerHTML = `<img src="${item.cover}" style="max-height:80px; margin-bottom:10px; border-radius:5px;"><span>Klik untuk ubah</span>`;
+        document.getElementById('edit-filetype').value = item.fileType;
+
+        const preview = document.getElementById('previewEdit');
+        const imgUrl = `${BASE_URL}/storage/${item.cover_image}`;
+        preview.innerHTML = `<img src="${imgUrl}" style="max-height:80px; margin-bottom:10px; border-radius:5px;"><span>Klik untuk ubah</span>`;
         showModal('modalEdit');
     }
 
     async function handleEdit() {
         const formData = new FormData();
-        formData.append('_method', 'PUT');
-        formData.append('judul', document.getElementById('edit-judul').value);
-        formData.append('link', document.getElementById('edit-link').value);
+        formData.append('_method', 'PUT'); // Penting untuk update file di Laravel
+        formData.append('title', document.getElementById('edit-judul').value);
+        formData.append('url', document.getElementById('edit-link').value);
         formData.append('cover_by', document.getElementById('edit-coverby').value);
+        formData.append('fileType', document.getElementById('edit-filetype').value);
 
         const fileInput = document.getElementById('fileEdit');
-        if (fileInput.files[0]) formData.append('cover', fileInput.files[0]);
+        if (fileInput.files[0]) formData.append('cover_image', fileInput.files[0]);
 
         try {
-            const res = await fetch(`${API_URL}/${selectedKaryaId}`, {
-                method: 'POST',
+            const res = await fetch(`${API_URL}/${selectedId}`, {
+                method: 'POST', // Gunakan POST + _method PUT untuk form-data
                 headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' },
                 body: formData
             });
@@ -357,10 +489,10 @@
                 hideModal('modalEdit');
                 loadKarya();
             }
-        } catch (error) { alert("Gagal update karya"); }
+        } catch (error) { alert("Gagal update data"); }
     }
-    document.querySelector('#modalEdit .btn-save').onclick = handleEdit;
 
+    // Hapus Data
     let deleteId = null;
     function prepareDelete(id) {
         deleteId = id;
@@ -379,16 +511,10 @@
             }
         } catch (error) { alert("Gagal menghapus"); }
     }
-    document.querySelector('#modalHapus .btn-save').onclick = confirmDelete;
 
-    document.querySelector('.btn-logout').onclick = () => {
-        localStorage.removeItem('access_token');
-        window.location.href = "login.html";
-    };
-
+    // Helper UI
     function showModal(id) { document.getElementById(id).style.display = 'flex'; }
     function hideModal(id) { document.getElementById(id).style.display = 'none'; }
-
     function previewImg(input, targetId) {
         const preview = document.getElementById(targetId);
         if (input.files && input.files[0]) {
@@ -400,6 +526,30 @@
         }
     }
 
+    // Init
+    function logout() {
+        document.getElementById('modalLogout').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('modalLogout').style.display = 'none';
+    }
+
+    function executeLogout() {
+        localStorage.clear();
+        window.location.href = "/login";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalLogout');
+        if (event.target == modal) {
+            closeLogoutModal();
+        }
+    }
+    
+    document.querySelector('#modalTambah .btn-save').onclick = handleTambah;
+    document.querySelector('#modalEdit .btn-save').onclick = handleEdit;
+    document.querySelector('#modalHapus .btn-save').onclick = confirmDelete;
     loadKarya();
 </script>
 

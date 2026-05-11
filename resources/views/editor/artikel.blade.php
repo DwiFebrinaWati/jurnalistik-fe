@@ -148,30 +148,44 @@
             </div>
         </div>
 
-        <div id="dashboard-view">
-            <div class="page-header">
-                <h1>Artikel</h1>
-                <p>Jurnalistik SMA Negeri 12 Depok</p>
+            <div id="dashboard-view">
+        <div class="page-header">
+            <h1>Artikel</h1>
+            <p>Jurnalistik SMA Negeri 12 Depok</p>
+        </div>
+
+        <div class="tabs-container" id="tabs-container">
+            <button class="tab-btn" data-status="disimpan">Disimpan</button>
+            <button class="tab-btn" data-status="dikirim">Dikirim</button>
+            <button class="tab-btn" data-status="ditolak">Ditolak</button>
+            <button class="tab-btn active" data-status="diterima">Diterima</button>
+            <button class="tab-btn" data-status="dipublish">Dipublish</button>
+        </div>
+
+        <div class="artikel-grid" id="artikel-grid">
+            </div>
+    </div>
+
+    <div id="detail-view">
+        <button class="btn-back" onclick="closeDetail()"><span>←</span> Kembali ke Daftar</button>
+
+        <div class="detail-container">
+            <div class="detail-actions">
+                <button class="btn-tolak" onclick="toggleModal(true)">Tolak</button>
+                <button class="btn-terima" id="btn-action-primary" onclick="handleMainAction()">Terima</button>
             </div>
 
-            <div class="tabs-container">
-                <button class="tab-btn" onclick="switchTab(this)">Disimpan</button>
-                <button class="tab-btn" onclick="switchTab(this)">Dikirim</button>
-                <button class="tab-btn" onclick="switchTab(this)">Ditolak</button>
-                <button class="tab-btn active" onclick="switchTab(this)">Diterima</button>
-                <button class="tab-btn" onclick="switchTab(this)">Dipublish</button>
-            </div>
+            <input type="text" id="edit-judul" class="detail-judul" style="width: 100%; border: none; background: transparent; font-size: 32px; font-weight: 700; margin-bottom: 10px; outline: none;">
 
-            <div class="artikel-grid">
-                <div class="artikel-card" onclick="openDetail()">
-                    <img src="/images/artikel.jpg" class="data-img">
-                    <div class="card-body">
-                        <h3>Daftar Nama Siswa yang Berhasil Lolos SNBP 2026</h3>
-                        <div class="card-meta">🕒 Sabtu, 6 Desember 2025</div>
-                    </div>
-                </div>
+            <p class="detail-meta" id="edit-meta"></p>
+
+            <img src="" class="detail-img" id="edit-img">
+
+            <div class="detail-isi">
+                <textarea id="edit-isi" style="width: 100%; min-height: 400px; border: 1px solid #ddd; padding: 20px; border-radius: 10px; line-height: 1.8; font-family: inherit; font-size: 15px; resize: vertical;"></textarea>
             </div>
         </div>
+    </div>
 
         <div id="detail-view">
             <button class="btn-back" onclick="closeDetail()"><span>←</span> Kembali ke Daftar</button>
@@ -207,32 +221,71 @@
 </div>
 
 <script>
-    const API_URL = 'https://jurnalsmandas.web.id/api/articles';
+    const BASE_URL = 'http://127.0.0.1:8000/api';
+    const API_URL = `${BASE_URL}/articles`;
     const TOKEN = localStorage.getItem('access_token');
-    let currentArticleId = null;
-    let activeStatus = 'diterima';
+    const ROOT_URL = "http://127.0.0.1:8000";
 
-    if (!TOKEN) {
-        window.location.href = "login.html";
+    let currentArticleId = null;
+    // Set default status agar "Diajukan" aktif di awal
+    let activeStatus = 'submitted';
+
+    if (!TOKEN) { window.location.href = "/login"; }
+
+    function renderTabs(mode = 'dashboard') {
+        const tabsContainer = document.getElementById('tabs-container');
+
+        // Mapping label dan status sesuai permintaanmu
+        const allTabs = [
+            { label: 'Diajukan', status: 'submitted' },
+            { label: 'Diterima', status: 'accepted' },
+            { label: 'Ditolak', status: 'rejected' },
+            { label: 'Dipublish', status: 'published' }
+        ];
+
+        tabsContainer.innerHTML = '';
+
+        // Tampilkan semua 4 tab di dashboard
+        const filteredTabs = allTabs;
+
+        filteredTabs.forEach(tab => {
+            const btn = document.createElement('button');
+            btn.className = `tab-btn ${activeStatus === tab.status ? 'active' : ''}`;
+            btn.innerText = tab.label;
+            btn.onclick = () => {
+                activeStatus = tab.status;
+                renderTabs(mode);
+                loadArticles(tab.status);
+            };
+            tabsContainer.appendChild(btn);
+        });
     }
 
-    async function loadArticles(status = 'diterima') {
-        activeStatus = status;
+    async function loadArticles(status = 'submitted') {
         try {
             const response = await fetch(`${API_URL}?status=${status}`, {
                 headers: { 'Authorization': `Bearer ${TOKEN}` }
             });
             const result = await response.json();
-            const grid = document.querySelector('.artikel-grid');
+            const grid = document.getElementById('artikel-grid');
             grid.innerHTML = '';
 
-            result.data.forEach(art => {
+            const articles = result.data || [];
+
+            articles.forEach(art => {
+                const fileGambar = art.photo || art.image || art.thumbnail || art.gambar;
+                let gambar = 'https://via.placeholder.com/400x225?text=No+Image';
+
+                if (fileGambar) {
+                    gambar = fileGambar.startsWith('http') ? fileGambar : `${ROOT_URL}/storage/${fileGambar}`;
+                }
+
                 grid.innerHTML += `
                     <div class="artikel-card" onclick="openDetail(${art.id})">
-                        <img src="${art.image_url || '/images/artikel.jpg'}" class="card-img">
+                        <img src="${gambar}" class="card-img">
                         <div class="card-body">
-                            <h3>${art.title}</h3>
-                            <div class="card-meta">🕒 ${art.date} | ✍️ ${art.author_name}</div>
+                            <h3>${art.title || 'Tanpa Judul'}</h3>
+                            <div class="card-meta">🕒 ${art.timestamps?.created_at || ''}</div>
                         </div>
                     </div>
                 `;
@@ -242,39 +295,77 @@
         }
     }
 
-    function switchTab(el) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        const status = el.innerText.toLowerCase();
-        loadArticles(status);
-    }
-
     async function openDetail(id) {
         currentArticleId = id;
         try {
             const response = await fetch(`${API_URL}/${id}`, {
                 headers: { 'Authorization': `Bearer ${TOKEN}` }
             });
-            const art = await response.json();
 
-            document.querySelector('.detail-judul').innerText = art.title;
-            document.querySelector('.detail-meta').innerText = `${art.author_name} | ${art.date}`;
-            document.querySelector('.detail-img').src = art.image_url;
-            document.querySelector('.detail-isi').innerHTML = art.content;
+            if (!response.ok) throw new Error("Gagal mengambil data");
 
-            // Sembunyikan/Tampilkan tombol aksi hanya pada artikel yang "dikirim"
-            const actions = document.querySelector('.detail-actions');
-            actions.style.display = activeStatus === 'dikirim' ? 'flex' : 'none';
+            const resData = await response.json();
+            const art = resData.data || resData;
+
+            // KONSEP: BISA EDIT (readOnly = false)
+            const judulInput = document.getElementById('edit-judul');
+            const isiInput = document.getElementById('edit-isi');
+
+            judulInput.value = art.title || '';
+            judulInput.readOnly = false;
+
+            isiInput.value = art.full_content || art.content || '';
+            isiInput.readOnly = false;
+
+            // Preview Gambar
+            const fileGambar = art.photo || art.thumbnail || art.image;
+            let gambarUrl = 'https://via.placeholder.com/400x225?text=No+Image';
+            if (fileGambar) {
+                gambarUrl = fileGambar.startsWith('http') ? fileGambar : `${ROOT_URL}/storage/${fileGambar}`;
+            }
+            document.getElementById('edit-img').src = gambarUrl;
+
+            // Meta Info
+            const authorName = art.author ? art.author.name : 'Anonim';
+            const tanggal = art.timestamps?.created_at || '-';
+            document.getElementById('edit-meta').innerText = `${authorName} | ${tanggal}`;
+
+            // Sembunyikan Tabs saat fokus edit detail
+            document.getElementById('tabs-container').innerHTML = '';
+
+            // Update Label Tombol Aksi Utama
+            const btnPrimary = document.getElementById('btn-action-primary');
+            if (btnPrimary) {
+                if (activeStatus === 'submitted') {
+                    btnPrimary.innerText = "Terima & Simpan";
+                } else if (activeStatus === 'accepted') {
+                    btnPrimary.innerText = "Publish & Simpan";
+                } else {
+                    btnPrimary.innerText = "Simpan Perubahan";
+                }
+            }
 
             document.getElementById('dashboard-view').style.display = 'none';
             document.getElementById('detail-view').style.display = 'block';
+
         } catch (error) {
             alert("Gagal mengambil detail artikel");
         }
     }
 
-    async function handleApprove() {
-        if (!confirm("Terima artikel ini?")) return;
+    async function handleMainAction() {
+        // Alur status: submitted -> accepted -> published
+        let nextStatus = activeStatus;
+        if (activeStatus === 'submitted') nextStatus = 'accepted';
+        else if (activeStatus === 'accepted') nextStatus = 'published';
+
+        if (!confirm(`Simpan perubahan dan ubah status ke ${nextStatus}?`)) return;
+
+        const updatedData = {
+            status: nextStatus,
+            title: document.getElementById('edit-judul').value,
+            content: document.getElementById('edit-isi').value
+        };
 
         try {
             const response = await fetch(`${API_URL}/${currentArticleId}/status`, {
@@ -283,19 +374,17 @@
                     'Authorization': `Bearer ${TOKEN}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ status: 'diterima' })
+                body: JSON.stringify(updatedData)
             });
 
             if (response.ok) {
-                alert("Artikel diterima!");
+                alert(`Berhasil memperbarui artikel!`);
                 closeDetail();
-                loadArticles('dikirim');
             }
         } catch (error) {
             alert("Gagal memproses artikel");
         }
     }
-    document.querySelector('.btn-terima').onclick = handleApprove;
 
     async function handleReject() {
         const note = document.querySelector('#modalRevisi textarea').value;
@@ -309,39 +398,47 @@
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    status: 'ditolak',
+                    status: 'rejected',
                     revision_note: note
                 })
             });
 
             if (response.ok) {
-                alert("Artikel ditolak & dikirim kembali ke Author.");
+                alert("Artikel ditolak!");
                 toggleModal(false);
                 closeDetail();
-                loadArticles('dikirim');
             }
         } catch (error) {
             alert("Gagal menolak artikel");
         }
     }
-    document.querySelector('#modalRevisi .btn-terima').onclick = handleReject;
 
-    // UI UTILS
     function closeDetail() {
         document.getElementById('dashboard-view').style.display = 'block';
         document.getElementById('detail-view').style.display = 'none';
+        renderTabs('dashboard');
+        loadArticles(activeStatus);
     }
 
     function toggleModal(show) {
         document.getElementById('modalRevisi').style.display = show ? 'flex' : 'none';
     }
 
-    document.querySelector('.btn-logout').onclick = () => {
-        localStorage.removeItem('access_token');
-        window.location.href = "login.html";
-    };
+    // Fungsi pembantu untuk memicu modal dari HTML
+    function openRejectModal() {
+        toggleModal(true);
+    }
 
-    loadArticles();
+    document.addEventListener('DOMContentLoaded', () => {
+        renderTabs('dashboard');
+        loadArticles('submitted'); // Otomatis muat status submitted saat pertama buka
+    });
+
+    // Menghubungkan tombol konfirmasi di dalam modal
+    const confirmRejectBtn = document.querySelector('#modalRevisi .btn-terima');
+    if (confirmRejectBtn) {
+        confirmRejectBtn.onclick = handleReject;
+    }
 </script>
 
 </body>

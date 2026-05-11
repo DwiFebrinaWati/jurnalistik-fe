@@ -7,7 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* --- RESET & BASE --- */
+        /* CSS tetap sama sesuai permintaan (JANGAN MENGUBAH TAMPILAN) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root {
             --primary-emerald: #1da077;
@@ -16,11 +16,7 @@
             --sidebar-width: 260px;
         }
         body { background-color: var(--soft-bg); color: #333; }
-
-        /* --- LAYOUT --- */
         .wrapper { display: flex; min-height: 100vh; }
-
-        /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-width); background: #fff; display: flex;
             flex-direction: column; border-right: 1px solid #edf2f0;
@@ -36,40 +32,30 @@
         }
         .nav-link.active { background-color: var(--primary-emerald); color: #fff; }
         .nav-link:hover:not(.active) { background-color: #f0fdf9; color: var(--primary-emerald); }
-
         .logout-area { padding: 20px; }
         .btn-logout {
             width: 100%; padding: 12px; background: #fff;
             border: 1.5px solid #d1d9d6; border-radius: 12px;
             cursor: pointer; color: #666; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-
-        /* --- MAIN CONTENT --- */
         .main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; }
         .header-top { display: flex; justify-content: flex-end; margin-bottom: 30px; }
         .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
         .user-profile img { width: 35px; height: 35px; border-radius: 50%; }
-
-        /* --- HEADER PAGE --- */
         .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; }
         .page-header h1 { font-size: 28px; font-weight: 700; color: #1a1c1b; }
         .page-header p { color: #9ca3af; font-size: 14px; }
-
         .btn-tambah {
             background-color: var(--primary-emerald); color: white; border: none;
             padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; gap: 8px;
         }
-
-        /* --- TABS --- */
         .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; }
         .tab-btn {
             padding: 8px 20px; border-radius: 6px; border: 1.5px solid #eee;
             background: #fff; cursor: pointer; color: #7d8581; font-weight: 500; transition: 0.3s;
         }
         .tab-btn.active { border-color: var(--primary-emerald); color: var(--primary-emerald); font-weight: 600; }
-
-        /* --- ARTIKEL GRID --- */
         .artikel-grid {
             display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px; margin-bottom: 30px;
@@ -77,36 +63,27 @@
         .artikel-card { background: #fff; border-radius: 12px; border: 1px solid #eee; overflow: hidden; }
         .artikel-img-box { width: 100%; aspect-ratio: 16/9; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #f0f0f0; }
         .artikel-img-box img { width: 100%; height: 100%; object-fit: cover; }
-
         .artikel-body { padding: 15px; }
         .artikel-body h3 { font-size: 13px; font-weight: 700; color: #1a1c1b; margin-bottom: 8px; height: 38px; overflow: hidden; }
         .artikel-meta-data { font-size: 11px; color: #9ca3af; margin-bottom: 12px; }
-
         .card-actions { display: flex; gap: 8px; }
         .btn-card { flex: 1; padding: 7px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1.5px solid transparent; }
         .btn-edit { background: #f0f4ff; color: #4c6ef5; border-color: #dbe4ff; }
         .btn-hapus { background: #fff5f5; color: #fa5252; border-color: #ffe3e3; }
-
-        /* --- EDITOR VIEW --- */
         #editor-view { display: none; background: #ececec; border-radius: 20px; padding: 40px; min-height: 80vh; position: relative; }
         .editor-header-btns { position: absolute; top: 25px; right: 25px; display: flex; gap: 10px; }
         .btn-save { background: #fff; color: var(--primary-emerald); border: 1.5px solid var(--primary-emerald); padding: 8px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; }
         .btn-submit { background: var(--primary-emerald); color: #fff; border: none; padding: 8px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; }
-
         .input-judul { width: 100%; background: transparent; border: none; font-size: 32px; font-weight: 700; outline: none; color: #1a1c1b; margin-bottom: 5px; }
         .meta-display { display: flex; gap: 10px; margin-bottom: 20px; }
         .meta-display input { background: transparent; border: none; color: #888; font-size: 16px; outline: none; width: fit-content; }
-
         .upload-area {
             width: 200px; aspect-ratio: 4/3; background: #fff; border: 2px dashed #ddd;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             cursor: pointer; border-radius: 10px; margin-bottom: 25px; color: #999; overflow: hidden;
         }
         .upload-area img { width: 100%; height: 100%; object-fit: cover; }
-
         .input-isi { width: 100%; min-height: 300px; background: transparent; border: none; outline: none; font-size: 16px; line-height: 1.7; resize: none; color: #444; }
-
-        /* --- MODAL KONFIRMASI --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none; align-items: center;
@@ -118,16 +95,13 @@
         .btn-m { padding: 10px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; min-width: 100px; }
         .btn-no { background: #eee; color: #666; }
         .btn-yes { background: #fa5252; color: #fff; }
-
-        .nav-link i {
-        width: 20px;
-        margin-right: 12px;
-        font-size: 18px;
-        text-align: center;
-        }
-
-        .btn-logout i {
-        margin-right: 8px;
+        .nav-link i { width: 20px; margin-right: 12px; font-size: 18px; text-align: center; }
+        .btn-logout i { margin-right: 8px; }
+        .disabled-btn {
+            background: #e5e7eb !important;
+            color: #9ca3af !important;
+            cursor: not-allowed !important;
+            border: none !important;
         }
     </style>
 </head>
@@ -137,33 +111,21 @@
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
         <nav class="nav-menu">
-            <a href="#" class="nav-link">
-                <i class="fa-solid fa-user"></i> Pengguna
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fa-solid fa-users"></i> Anggota
-            </a>
-            <a href="#" class="nav-link active">
-                <i class="fa-solid fa-newspaper"></i> Artikel
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fa-solid fa-clipboard-list"></i> Materi
-            </a>
-            <a href="#" class="nav-link">
-                <i class="fa-solid fa-image"></i> Hasil karya
-            </a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-user"></i> Pengguna</a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-users"></i> Anggota</a>
+            <a href="#" class="nav-link active"><i class="fa-solid fa-newspaper"></i> Artikel</a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-clipboard-list"></i> Materi</a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-image"></i> Hasil karya</a>
         </nav>
         <div class="logout-area">
-            <button class="btn-logout">
-                <i class="fa-solid fa-right-from-bracket"></i> Logout
-            </button>
+            <button class="btn-logout" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
         </div>
     </aside>
 
     <main class="main-content">
         <div class="header-top">
             <div class="user-profile">
-                <span>Author</span>
+                <span id="display-username">Author</span>
                 <img src="https://ui-avatars.com/api/?name=Author&background=1da077&color=fff" alt="Profile">
             </div>
         </div>
@@ -178,36 +140,24 @@
             </div>
 
             <div class="tabs-container">
-                <button class="tab-btn active" onclick="switchTab(this)">Disimpan</button>
-                <button class="tab-btn" onclick="switchTab(this)">Dikirim</button>
-                <button class="tab-btn" onclick="switchTab(this)">Ditolak</button>
-                <button class="tab-btn" onclick="switchTab(this)">Diterima</button>
-                <button class="tab-btn" onclick="switchTab(this)">Dipublish</button>
+                <button class="tab-btn active" onclick="switchTab(this, 'disimpan')">Disimpan</button>
+                <button class="tab-btn" onclick="switchTab(this, 'dikirim')">Dikirim</button>
+                <button class="tab-btn" onclick="switchTab(this, 'ditolak')">Ditolak</button>
+                <button class="tab-btn" onclick="switchTab(this, 'diterima')">Diterima</button>
+                <button class="tab-btn" onclick="switchTab(this, 'dipublish')">Dipublish</button>
             </div>
 
-            <div class="artikel-grid">
-                <div class="artikel-card">
-                    <div class="artikel-img-box">
-                        <img src="/images/artikel.jpg" class="data-img">
-                    </div>
-                    <div class="artikel-body">
-                        <h3 class="data-judul">Daftar Nama Siswa yang Berhasil Lolos SNBP 2026</h3>
-                        <div class="artikel-meta-data">
-                            🕒 <span class="data-tgl">Sabtu, 6 Desember 2025</span> | ✍️ <span class="data-penulis">Ilya Saruni</span>
-                        </div>
-                        <div class="card-actions">
-                            <button class="btn-card btn-edit" onclick="openEditEditor(this)">Edit</button>
-                            <button class="btn-card btn-hapus" onclick="confirmDelete()">Hapus</button>
-                        </div>
-                    </div>
-                </div>
+            <div class="artikel-grid" id="article-container">
+                <!-- Data akan dimuat via JS -->
             </div>
         </div>
 
+        <!-- EDITOR VIEW -->
         <div id="editor-view">
             <div class="editor-header-btns">
-                <button class="btn-save" onclick="hideEditor()">Batal</button>
-                <button class="btn-submit">Submit</button>
+                <button class="btn-save" onclick="handleSave(false)">Simpan Draf</button>
+                <button class="btn-submit" onclick="handleSave(true)">Submit</button>
+                <button class="btn-save" onclick="hideEditor()" style="border-color: #999; color: #666;">Batal</button>
             </div>
 
             <input type="text" class="input-judul" id="edit-judul" placeholder="Judul Artikel">
@@ -228,6 +178,7 @@
     </main>
 </div>
 
+<!-- Modal Konfirmasi Hapus -->
 <div id="modalHapus" class="modal">
     <div class="modal-content">
         <h2>Apakah Anda yakin ingin menghapus artikel ini?</h2>
@@ -239,146 +190,256 @@
 </div>
 
 <script>
-    const API_URL = 'https://jurnalsmandas.web.id/api/articles';
+    const BASE_URL = "http://127.0.0.1:8000/api"; // Pastikan ini sesuai URL backend Laravel-mu
+    const API_URL = `${BASE_URL}/articles`;
     const TOKEN = localStorage.getItem('access_token');
-    let currentArticleId = null; // Penanda apakah sedang edit atau tambah baru
-    let currentStatus = 'disimpan'; // Default tab
+    const userData = JSON.parse(localStorage.getItem('user_data'));
+    const ROOT_URL = "http://127.0.0.1:8000";
 
-    // Cek Login
-    if (!TOKEN) {
-        window.location.href = "login.html";
+    let currentArticleId = null;
+    let currentStatusTab = 'disimpan';
+    let deleteId = null;
+
+    if (!TOKEN) window.location.href = "/login";
+    if (userData) document.getElementById('display-username').innerText = userData.name;
+
+    function getHeader() {
+        return {
+            'Authorization': `Bearer ${TOKEN}`,
+            'Accept': 'application/json'
+        };
     }
 
-    // 1. FUNGSI TAMPILKAN DATA BERDASARKAN STATUS (TAB)
     async function loadArticles(status = 'disimpan') {
-        currentStatus = status;
-        try {
-            const response = await fetch(`${API_URL}?status=${status}`, {
-                headers: { 'Authorization': `Bearer ${TOKEN}` }
-            });
-            const result = await response.json();
-            const grid = document.querySelector('.artikel-grid');
-            grid.innerHTML = '';
+    currentStatusTab = status;
+    const grid = document.getElementById('article-container');
+    grid.innerHTML = '<p>Memuat...</p>';
 
-            result.data.forEach(art => {
-                grid.innerHTML += `
-                    <div class="artikel-card">
-                        <div class="artikel-img-box">
-                            <img src="${art.image_url || '/images/artikel.jpg'}" class="data-img">
+    const statusMap = {
+        'disimpan': 'draft',
+        'dikirim': 'submitted',
+        'diterima': 'approved',
+        'ditolak': 'rejected',
+        'dipublish': 'published'
+    };
+
+    try {
+        const response = await fetch(`${API_URL}?status=${statusMap[status]}`, {
+            headers: getHeader()
+        });
+        const result = await response.json();
+
+        console.log("Data Artikel dari API:", result);
+
+        const articles = result.data || result;
+        grid.innerHTML = '';
+
+        if (!articles || articles.length === 0) {
+            grid.innerHTML = `<p style="color:#999">Tidak ada artikel dalam kategori ini.</p>`;
+            return;
+        }
+
+        articles.forEach(art => {
+            const fileGambar = art.photo || art.image || art.thumbnail || art.gambar;
+            let gambar = 'https://via.placeholder.com/400x225?text=No+Image';
+
+            if (fileGambar) {
+                gambar = fileGambar.startsWith('http') ? fileGambar : `${ROOT_URL}/storage/${fileGambar}`;
+            }
+
+            const tglRaw = art.created_at || art.published_at || art.date;
+            let tglDibuat = '-';
+
+            if (tglRaw) {
+                const dateObj = new Date(tglRaw);
+                if (!isNaN(dateObj)) {
+                    tglDibuat = dateObj.toLocaleDateString('id-ID', {
+                        day: 'numeric', month: 'long', year: 'numeric'
+                    });
+                }
+            }
+
+            const rawStatus = typeof art.status === 'object' ? art.status.value : art.status;
+            const isEditable = (rawStatus === 'draft');
+
+            grid.innerHTML += `
+                <div class="artikel-card">
+                    <div class="artikel-img-box">
+                        <img src="${gambar}" onerror="this.src='https://via.placeholder.com/400x225?text=Error+Loading'">
+                    </div>
+                    <div class="artikel-body">
+                        <h3>${art.title || 'Tanpa Judul'}</h3>
+                        <div class="artikel-meta-data">
+                            🕒 <span>${tglDibuat}</span>
                         </div>
-                        <div class="artikel-body">
-                            <h3 class="data-judul">${art.title}</h3>
-                            <div class="artikel-meta-data">
-                                🕒 <span class="data-tgl">${art.date}</span> | ✍️ <span class="data-penulis">${art.author_name}</span>
-                            </div>
-                            <div class="card-actions">
-                                ${status === 'disimpan' || status === 'ditolak' ?
-                                    `<button class="btn-card btn-edit" onclick="openEditEditor(${art.id})">Edit</button>` :
-                                    `<button class="btn-card btn-edit" style="background:#eee; color:#999; border:none;" disabled>Terkunci</button>`
-                                }
-                                <button class="btn-card btn-hapus" onclick="confirmDelete(${art.id})">Hapus</button>
-                            </div>
+                        <div class="card-actions">
+                            ${isEditable ?
+                                `<button class="btn-card btn-edit" onclick='openEditEditor(${JSON.stringify(art).replace(/'/g, "&apos;")})'>Edit</button>` :
+                                `<button class="btn-card disabled-btn" disabled>🔒 Terkunci</button>`
+                            }
+                            <button class="btn-card btn-hapus" onclick="confirmDelete(${art.id || art.article_id})">Hapus</button>
                         </div>
                     </div>
-                `;
+                </div>`;
+        });
+    } catch (e) {
+        console.error("Error loadArticles:", e);
+        grid.innerHTML = 'Gagal memuat data.';
+    }
+}
+
+    function openTambahEditor() {
+        currentArticleId = null;
+        document.getElementById('edit-judul').value = '';
+        document.getElementById('edit-isi').value = '';
+        document.getElementById('edit-author').value = userData ? userData.name : 'Author';
+        document.getElementById('edit-tanggal').value = new Date().toLocaleDateString('id-ID');
+        document.getElementById('preview-box').innerHTML = '<span>+ Upload Photo</span>';
+        document.getElementById('file-input').value = '';
+
+        showEditor();
+    }
+
+    function openEditEditor(art) {
+    const data = art.data ? art.data : art;
+
+    currentArticleId = data.id;
+
+    document.getElementById('edit-judul').value = data.title || "";
+    document.getElementById('edit-isi').value = data.full_content || "";
+    document.getElementById('edit-author').value = data.author?.name || data.user?.name || 'Author';
+
+    const tglRaw = data.created_at;
+    if (tglRaw) {
+        const dateObj = new Date(tglRaw);
+        if (!isNaN(dateObj)) {
+            document.getElementById('edit-tanggal').value = dateObj.toLocaleDateString('id-ID', {
+                day: 'numeric', month: 'long', year: 'numeric'
             });
-        } catch (error) {
-            console.error("Gagal memuat artikel:", error);
         }
     }
 
-    function switchTab(el) {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        el.classList.add('active');
-        const status = el.innerText.toLowerCase();
-        loadArticles(status);
+    const photo = data.photo || data.thumbnail; // Cek field photo
+    if (photo) {
+        const imgPath = photo.startsWith('http') ? photo : `${ROOT_URL}/storage/${photo}`;
+        document.getElementById('preview-box').innerHTML = `<img src="${imgPath}" style="width:100%; height:100%; object-fit:cover;">`;
+    } else {
+        document.getElementById('preview-box').innerHTML = '<span>+ Upload Photo</span>';
     }
+
+    showEditor();
+}
 
     async function handleSave(isSubmit = false) {
-        const title = document.getElementById('edit-judul').value;
-        const content = document.getElementById('edit-isi').value;
-        const fileInput = document.getElementById('file-input');
+        const btnSave = document.querySelector(isSubmit ? '.btn-submit' : '.btn-save');
+        const originalText = btnSave.innerText;
 
-        // Gunakan FormData karena ada upload gambar
+        btnSave.innerText = "Proses...";
+        btnSave.disabled = true;
+
         const formData = new FormData();
-        formData.append('title', title);
-        formData.append('content', content);
-        formData.append('status', isSubmit ? 'dikirim' : 'disimpan');
+        formData.append('title', document.getElementById('edit-judul').value);
+        formData.append('content', document.getElementById('edit-isi').value);
+        formData.append('status', isSubmit ? 'submitted' : 'draft');
 
+        const fileInput = document.getElementById('file-input');
         if (fileInput.files[0]) {
-            formData.append('image', fileInput.files[0]);
+            formData.append('photo', fileInput.files[0]);
         }
 
-        const method = currentArticleId ? 'POST' : 'POST';
-        if (currentArticleId) formData.append('_method', 'PUT');
-
-        const url = currentArticleId ? `${API_URL}/${currentArticleId}` : API_URL;
+        let url = API_URL;
+        if (currentArticleId) {
+            url = `${API_URL}/${currentArticleId}`;
+        }
 
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${TOKEN}` },
+                headers: getHeader(),
                 body: formData
             });
 
+            const result = await response.json();
+
             if (response.ok) {
-                alert(isSubmit ? "Artikel berhasil dikirim ke Editor!" : "Artikel disimpan di draf.");
+                alert(currentArticleId ? "Artikel diperbarui!" : "Artikel berhasil dibuat!");
                 hideEditor();
-                loadArticles(currentStatus);
+                loadArticles('disimpan');
+            } else {
+                alert("Gagal: " + (result.message || "Periksa kembali inputan Anda"));
             }
-        } catch (error) {
-            alert("Gagal menyimpan artikel.");
+        } catch (e) {
+            alert("Kesalahan koneksi ke server.");
+        } finally {
+            btnSave.innerText = originalText;
+            btnSave.disabled = false;
         }
     }
 
-    document.querySelector('.btn-submit').onclick = () => handleSave(true);
-    document.querySelector('.btn-save').innerHTML = "Simpan Draf";
-    document.querySelector('.btn-save').onclick = () => handleSave(false);
-
-    async function openEditEditor(id) {
-        currentArticleId = id;
-        try {
-            const response = await fetch(`${API_URL}/${id}`, {
-                headers: { 'Authorization': `Bearer ${TOKEN}` }
-            });
-            const art = await response.json();
-
-            document.getElementById('edit-judul').value = art.title;
-            document.getElementById('edit-isi').value = art.content;
-            document.getElementById('edit-author').value = art.author_name;
-            document.getElementById('edit-tanggal').value = art.date;
-            document.getElementById('preview-box').innerHTML = `<img src="${art.image_url}">`;
-
-            document.getElementById('list-view').style.display = 'none';
-            document.getElementById('editor-view').style.display = 'block';
-        } catch (error) {
-            alert("Gagal mengambil detail artikel");
-        }
-    }
-
-    let deleteId = null;
     function confirmDelete(id) {
         deleteId = id;
         document.getElementById('modalHapus').style.display = 'flex';
     }
 
+    function closeDelete() {
+        document.getElementById('modalHapus').style.display = 'none';
+        deleteId = null;
+    }
+
     async function executeDelete() {
+        if(!deleteId) return;
         try {
             const response = await fetch(`${API_URL}/${deleteId}`, {
                 method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${TOKEN}` }
+                headers: getHeader()
             });
+
             if (response.ok) {
                 closeDelete();
-                loadArticles(currentStatus);
+                loadArticles(currentStatusTab);
+            } else {
+                alert("Gagal menghapus artikel.");
             }
-        } catch (error) {
-            alert("Gagal menghapus");
+        } catch (e) { alert("Error koneksi."); }
+    }
+
+    /** UTILS **/
+    function showEditor() {
+        document.getElementById('list-view').style.display = 'none';
+        document.getElementById('editor-view').style.display = 'block';
+    }
+
+    function hideEditor() {
+        document.getElementById('list-view').style.display = 'block';
+        document.getElementById('editor-view').style.display = 'none';
+        currentArticleId = null;
+    }
+
+    function previewFile(input) {
+        const preview = document.getElementById('preview-box');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                preview.innerHTML = `<img src="${e.target.result}" style="width:100%; height:100%; object-fit:cover;">`;
+            };
+            reader.readAsDataURL(input.files[0]);
         }
     }
 
-    loadArticles();
-</script>
+    function switchTab(el, status) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        el.classList.add('active');
+        loadArticles(status);
+    }
 
+    function logout() {
+        if(confirm("Yakin ingin keluar?")) {
+            localStorage.clear();
+            window.location.href = "/login";
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => loadArticles('disimpan'));
+</script>
 </body>
 </html>

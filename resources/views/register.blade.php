@@ -145,28 +145,28 @@
             <div class="form-box">
                 <h2>Create an account</h2>
 
-                <form action="#">
+                <form id="register-form">
                     <div class="input-group">
                         <label>Nama Lengkap</label>
-                        <input type="text" placeholder="Masukkan Nama Lengkap">
+                        <input type="text" id="reg-name" placeholder="Masukkan Nama Lengkap" required>
                     </div>
 
                     <div class="input-group">
                         <label>Email</label>
-                        <input type="email" placeholder="Masukkan Email">
+                        <input type="email" id="reg-email" placeholder="Masukkan Email" required>
                     </div>
 
                     <div class="input-group">
                         <label>Password</label>
                         <div style="position: relative;">
-                            <input type="password" id="password" placeholder="Masukkan Password">
+                            <input type="password" id="password" placeholder="Masukkan Password" required>
                         </div>
                     </div>
 
                     <div class="input-group">
                         <label>Konfirmasi Password</label>
                         <div style="position: relative;">
-                            <input type="password" id="confirm_password" placeholder="Konfirmasi Password">
+                            <input type="password" id="confirm_password" placeholder="Konfirmasi Password" required>
                         </div>
                     </div>
 
@@ -174,24 +174,26 @@
                 </form>
 
                 <p class="footer-text">
-                    Already Have An Account ? <a href="{{ route('login') }}">Log In</a>
+                    Already Have An Account ? <a href="/login">Log In</a>
                 </p>
             </div>
         </div>
     </div>
 
 <script>
-    const REGISTER_URL = 'https://jurnalsmandas.web.id/api/register';
+    // --- KONFIGURASI API LOKAL ---
+    const REGISTER_URL = 'http://127.0.0.1:8000/api/register';
 
     async function handleRegister(event) {
         event.preventDefault();
 
-        const name = document.querySelector('input[placeholder="Masukkan Nama Lengkap"]').value;
-        const email = document.querySelector('input[placeholder="Masukkan Email"]').value;
+        const name = document.getElementById('reg-name').value;
+        const email = document.getElementById('reg-email').value;
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
         const submitBtn = document.querySelector('.btn-submit');
 
+        // Validasi Sederhana
         if (password !== confirmPassword) {
             alert("Password dan Konfirmasi Password tidak cocok!");
             return;
@@ -210,7 +212,8 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
                 body: JSON.stringify({
                     name: name,
@@ -224,20 +227,22 @@
 
             if (response.ok) {
                 alert("Registrasi Berhasil! Silakan login untuk melanjutkan.");
-                window.location.href = "login.html";
+                // Arahkan ke file login lokal kamu
+                window.location.href = "/login";
             } else {
+                // Tampilkan pesan error spesifik dari Laravel (misal email sudah ada)
                 alert(result.message || "Registrasi gagal. Periksa kembali data Anda.");
             }
         } catch (error) {
             console.error("Error:", error);
-            alert("Terjadi kesalahan jaringan.");
+            alert("Terjadi kesalahan jaringan! Pastikan 'php artisan serve' sudah jalan.");
         } finally {
             submitBtn.innerText = "Create account";
             submitBtn.disabled = false;
         }
     }
 
-    document.querySelector('form').onsubmit = handleRegister;
+    document.getElementById('register-form').onsubmit = handleRegister;
 </script>
 
 </body>

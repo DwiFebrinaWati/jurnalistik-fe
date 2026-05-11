@@ -38,9 +38,9 @@
 
         .logout-area { padding: 20px; }
         .btn-logout {
-            width: 100%; padding: 12px; background: #fff;
+            width: 100%; padding: 12px; background: transparent;
             border: 1.5px solid #d1d9d6; border-radius: 12px;
-            cursor: pointer; color: #666; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px;
+            cursor: pointer; color: #666; font-weight: 600;
         }
 
         /* --- MAIN CONTENT --- */
@@ -107,6 +107,79 @@
         .btn-logout i {
         margin-right: 8px;
         }
+
+        .modal-overlay {
+        display: none; /* Sembunyi secara default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Kotak Modal */
+    .modal-content {
+        background: white;
+        padding: 40px 60px;
+        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-content h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 30px;
+        font-size: 24px;
+        line-height: 1.3;
+    }
+
+    /* Container Tombol */
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    /* Gaya Tombol Umum */
+    .modal-buttons button {
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
+        min-width: 120px;
+    }
+
+    /* Tombol Kembali (Putih dengan Border Hijau) */
+    .btn-kembali {
+        background: white;
+        color: #10b981;
+        border: 2px solid #10b981;
+    }
+
+    .btn-kembali:hover {
+        background: #f0fdf4;
+    }
+
+    /* Tombol Ya (Hijau Solid) */
+    .btn-ya {
+        background: #10b981; /* Warna Hijau Emerald */
+        color: white;
+        border: none;
+    }
+
+    .btn-ya:hover {
+        background: #059669;
+    }
     </style>
 </head>
 <body>
@@ -132,7 +205,7 @@
             </a>
         </nav>
         <div class="logout-area">
-            <button class="btn-logout">
+            <button class="btn-logout" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
         </div>
@@ -209,17 +282,35 @@
     </main>
 </div>
 
-<script>
-    const API_URL = 'https://jurnalsmandas.web.id/api/artikel';
-    const TOKEN = localStorage.getItem('access_token');
-    let currentTab = 'diterima'; // Default tab
+<div id="modalLogout" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Apakah Anda yakin ingin keluar akun?</h2>
+        <div class="modal-buttons">
+            <button class="btn-kembali" onclick="closeLogoutModal()">Kembali</button>
+            <button class="btn-ya" onclick="executeLogout()">Ya</button>
+        </div>
+    </div>
+</div>
 
+<script>
+    const BASE_URL = 'http://127.0.0.1:8000/api';
+    const API_URL = `${BASE_URL}/api/articles`;
+    const TOKEN = localStorage.getItem('access_token');
+    let currentTab = 'diterima';
+    let selectedArtikelId = null;
+
+    // Proteksi Halaman
     if (!TOKEN) {
         window.location.href = "login.html";
     }
 
+    // 1. Fungsi Load Data dari API
     async function loadArtikel() {
+        const container = document.getElementById('artikel-container');
+        container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #9ca3af;">Memuat data...</p>';
+
         try {
+            // Kita kirim parameter status ke Controller
             const response = await fetch(`${API_URL}?status=${currentTab}`, {
                 headers: {
                     'Authorization': `Bearer ${TOKEN}`,
@@ -227,92 +318,106 @@
                 }
             });
             const result = await response.json();
+            const articles = result.data;
 
-            const container = document.getElementById('artikel-container');
-            container.innerHTML = ''; // Kosongkan dummy data
+            container.innerHTML = '';
 
-            if (result.data.length === 0) {
+            if (!articles || articles.length === 0) {
                 container.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #9ca3af; padding: 20px;">Tidak ada artikel dengan status ${currentTab}.</p>`;
                 return;
             }
 
-            result.data.forEach(artikel => {
-                // Gunakan gambar default jika artikel.gambar kosong
-                const gambar = artikel.gambar || '{{ asset("images/artikel.jpg") }}';
+            articles.forEach(artikel => {
+                // Handle path gambar dari storage Laravel
+                const gambar = artikel.photo ? `${BASE_URL}/storage/${artikel.photo}` : '/images/artikel.jpg';
 
                 container.innerHTML += `
                     <div class="artikel-card" onclick='prepareDetail(${JSON.stringify(artikel).replace(/'/g, "&apos;")})'>
-                        <img src="${gambar}" class="artikel-img" alt="Artikel">
+                        <img src="${gambar}" class="artikel-img" alt="${artikel.title}">
                         <div class="artikel-body">
-                            <h3>${artikel.judul}</h3>
-                            <div class="artikel-date">🕒 ${artikel.tanggal_dibuat || 'Baru saja'}</div>
+                            <h3>${artikel.title}</h3>
+                            <div class="artikel-date">🕒 ${artikel.created_at || 'Baru saja'}</div>
                         </div>
                     </div>
                 `;
             });
         } catch (error) {
             console.error("Gagal mengambil data artikel:", error);
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: red;">Gagal terhubung ke server.</p>';
         }
     }
 
+    // 2. Fungsi Pindah Tab
     function switchTab(tab) {
         currentTab = tab;
-        // Update UI tombol tab
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
+            // Menyamakan teks tombol dengan variabel tab
             if(btn.innerText.toLowerCase() === tab) btn.classList.add('active');
         });
-        loadArtikel(); // Reload data sesuai status
+        loadArtikel();
     }
 
-    let selectedArtikelId = null;
-
+    // 3. Menampilkan Detail Artikel
     function prepareDetail(artikel) {
-        selectedArtikelId = artikel.id;
+        selectedArtikelId = artikel.article_id; // Menggunakan primary key dari model
         document.getElementById('main-list-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
 
-        document.getElementById('det-judul').innerText = artikel.judul;
-        document.getElementById('det-penulis').innerText = artikel.penulis || 'Anonim';
-        document.getElementById('det-tanggal').innerText = artikel.tanggal_dibuat;
+        document.getElementById('det-judul').innerText = artikel.title;
+        document.getElementById('det-penulis').innerText = artikel.author ? artikel.author.name : 'Anonim';
+        document.getElementById('det-tanggal').innerText = artikel.created_at;
+        document.querySelector('.detail-content').innerHTML = artikel.content;
 
-        document.querySelector('.detail-content').innerHTML = artikel.konten;
+        // Update gambar di detail
+        const detailImg = document.querySelector('#detail-view .detail-img') || document.querySelector('#detail-view img');
+        if(detailImg) {
+            detailImg.src = artikel.photo ? `${BASE_URL}/storage/${artikel.photo}` : '/images/artikel.jpg';
+        }
 
         const actionBtn = document.getElementById('btn-main-action');
+
+        // Logika tombol aksi berdasarkan tab aktif
         if(currentTab === 'dipublish') {
-            actionBtn.innerText = 'Unpublish';
+            actionBtn.innerText = 'Takedown (Arsip)';
             actionBtn.className = 'btn btn-unpublish';
-            actionBtn.onclick = () => updateStatus('diterima');
+            actionBtn.onclick = () => updateStatus('takedown');
         } else {
-            actionBtn.innerText = 'Publish';
+            actionBtn.innerText = 'Publish Sekarang';
             actionBtn.className = 'btn btn-action';
-            actionBtn.onclick = () => updateStatus('dipublish');
+            actionBtn.onclick = () => updateStatus('approve');
         }
     }
 
-    async function updateStatus(newStatus) {
+    // 4. Update Status (Approve/Takedown)
+    async function updateStatus(action) {
         if (!selectedArtikelId) return;
 
+        // Sesuaikan endpoint dengan api.php (takedown pakai PUT, approve pakai PATCH)
+        const method = action === 'approve' ? 'PATCH' : 'PUT';
+        const endpoint = `${API_URL}/${selectedArtikelId}/${action}`;
+
         try {
-            const res = await fetch(`${API_URL}/${selectedArtikelId}/status`, {
-                method: 'PATCH', // Atau 'PUT' sesuai dokumentasi API temanmu
+            const res = await fetch(endpoint, {
+                method: method,
                 headers: {
                     'Authorization': `Bearer ${TOKEN}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ status: newStatus })
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (res.ok) {
-                alert(`Artikel berhasil di-${newStatus}!`);
+                alert(`Aksi ${action} berhasil!`);
                 hideDetail();
                 loadArtikel();
             } else {
-                alert("Gagal memperbarui status artikel.");
+                const errData = await res.json();
+                alert("Gagal: " + (errData.message || "Terjadi kesalahan"));
             }
         } catch (error) {
             console.error("Error update status:", error);
+            alert("Koneksi gagal.");
         }
     }
 
@@ -322,12 +427,27 @@
         selectedArtikelId = null;
     }
 
-    document.querySelector('.btn-logout').addEventListener('click', () => {
-        localStorage.removeItem('access_token');
-        window.location.href = "login.html";
-    });
+function logout() {
+        document.getElementById('modalLogout').style.display = 'flex';
+    }
 
-    // Jalankan saat pertama kali buka halaman
+    function closeLogoutModal() {
+        document.getElementById('modalLogout').style.display = 'none';
+    }
+
+    function executeLogout() {
+        localStorage.clear();
+        window.location.href = "/login";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalLogout');
+        if (event.target == modal) {
+            closeLogoutModal();
+        }
+    }
+
+    // Init load
     loadArtikel();
 </script>
 

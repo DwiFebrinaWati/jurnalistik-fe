@@ -152,10 +152,10 @@
                 <div class="input-group">
                     <div class="label-flex">
                         <label>Password</label>
-                        <a href="#" class="forgot-link">Forgot</a>
+                        <a href="/forgot-password" class="forgot-link">Forgot</a>
                     </div>
                     <div class="input-wrapper">
-                        <input type="password" id="login-pass" placeholder="Masukkan password anda" required>
+                        <input type="password" id="login-pass" autocomplete="current-password" placeholder="Masukkan password anda" required>
                     </div>
                 </div>
 
@@ -163,60 +163,82 @@
             </form>
 
             <p class="footer-text">
-                Don't Have An Account ? <a href="#">Sign Up</a>
+                Don't Have An Account ? <a href="/register">Sign Up</a>
             </p>
         </div>
     </div>
 
     <script>
-        const loginForm = document.getElementById('login-form');
-        const btnSubmit = document.getElementById('btn-submit');
+    // 1. Sesuaikan PORT dengan yang muncul di terminal kamu (8000 atau 8001)
+    const BASE_URL = 'http://127.0.0.1:8000/api';
 
-        loginForm.addEventListener('submit', async (e) => {
-            e.preventDefault(); 
+    const loginForm = document.getElementById('login-form');
+    const btnSubmit = document.getElementById('btn-submit');
 
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('login-pass').value;
+    loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
 
-            // Loading State
-            btnSubmit.innerText = "Processing...";
-            btnSubmit.disabled = true;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('login-pass').value;
 
-            try {
-                const response = await fetch('https://jurnalsmandas.web.id/api/login', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json' // Memberitahu Laravel ini request API
-                    },
-                    body: JSON.stringify({
-                        email: email,
-                        password: password
-                    })
-                });
+        btnSubmit.innerText = "Processing...";
+        btnSubmit.disabled = true;
 
-                const result = await response.json();
-                console.log("Raw Response:", result);
+        try {
+            // Gunakan BASE_URL yang sudah didefinisikan
+            const response = await fetch(`${BASE_URL}/login`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            });
 
-                if (response.ok && result.data && result.data.token) {
-                    localStorage.setItem('access_token', result.data.token);
+            const result = await response.json();
 
-                    alert("Berhasil Login!");
+            if (response.ok) {
+            if (result.access_token) {
+                // 1. Simpan Token dan Role ke LocalStorage
+                localStorage.setItem('access_token', result.access_token);
+                localStorage.setItem('role_id', result.user.role_id);
 
-                    window.location.href = "articles.html";
+                alert("Berhasil Login!");
+
+                // 2. Logika Pengalihan Berdasarkan Role
+                const roleId = result.user.role_id;
+
+                if (roleId == 1) {
+                    // Admin: Ke dashboard utama
+                    window.location.href = "admin/users";
+                } else if (roleId == 2) {
+                    // Editor: Ke halaman artikel editor
+                    window.location.href = "editor/artikel";
+                } else if (roleId == 3) {
+                    // Author: Ke halaman artikel author
+                    window.location.href = "author/artikel";
                 } else {
-                    const errorMsg = result.message || "Email atau password salah.";
-                    alert("Gagal Login: " + errorMsg);
+                    alert("Role tidak dikenali!");
                 }
-
+            }
+                } else {
+                    // Menangani pesan error dari Laravel (401 atau validasi)
+                    alert("Gagal Login: " + (result.message || "Email atau password salah."));
+                }
             } catch (error) {
                 console.error("Fetch Error:", error);
-                alert("Koneksi gagal! Pastikan server aktif dan internet lancar.");
+                alert("Error: Tidak bisa terhubung ke server. Pastikan 'php artisan serve --port=8001' sudah jalan.");
             } finally {
+                // Mengembalikan tombol ke keadaan semula
                 btnSubmit.innerText = "Login";
                 btnSubmit.disabled = false;
             }
-        });
-    </script>
+    });
+</script>
+
 </body>
 </html>

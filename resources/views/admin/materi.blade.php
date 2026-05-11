@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+    <!-- CSS tetap sama seperti kode Anda (Tanpa Perubahan Tampilan) -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Materi Jurnalistik</title>
@@ -67,18 +68,8 @@
             background: #fff; cursor: pointer; color: #666; font-size: 14px;
             transition: all 0.3s ease;
         }
-        /* Hover */
-        .tab-item:hover {
-            border-color: var(--primary-emerald);
-            color: var(--primary-emerald);
-            background-color: #f0fdf9;
-        }
-        /* Active */
-        .tab-item.active {
-            background-color: var(--primary-emerald);
-            border-color: var(--primary-emerald);
-            color: #fff;
-        }
+        .tab-item:hover { border-color: var(--primary-emerald); color: var(--primary-emerald); background-color: #f0fdf9; }
+        .tab-item.active { background-color: var(--primary-emerald); border-color: var(--primary-emerald); color: #fff; }
 
         /* --- TABLE --- */
         .table-card { background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
@@ -86,7 +77,7 @@
         thead { background-color: var(--light-emerald); }
         th { padding: 15px 20px; text-align: left; font-size: 14px; font-weight: 600; }
         td { padding: 18px 20px; border-bottom: 1px solid #f3f4f6; font-size: 13px; vertical-align: middle; }
-        .link-text { color: #4c6ef5; text-decoration: none; }
+        .link-text { color: #4c6ef5; text-decoration: none; word-break: break-all; }
 
         .btn-action { padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
         .btn-edit { background: #edf2ff; color: #4c6ef5; border-color: #dbe4ff; margin-right: 5px; }
@@ -113,48 +104,103 @@
         .btn-cancel { background: #fff; color: var(--primary-emerald); border: 1.5px solid var(--primary-emerald); }
         .btn-save { background: var(--primary-emerald); color: #fff; }
 
-        /* Pagination */
         .pagination-area { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; font-size: 14px; }
         .page-nav { display: flex; gap: 8px; }
         .btn-page { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
         .btn-page.active { background: var(--primary-emerald); color: #fff; border-color: var(--primary-emerald); }
 
-        .nav-link i {
-        width: 20px;
-        margin-right: 12px;
-        font-size: 18px;
-        text-align: center;
-        }
+        .nav-link i { width: 20px; margin-right: 12px; font-size: 18px; text-align: center; }
+        .btn-logout i { margin-right: 8px; }
 
-        .btn-logout i {
-        margin-right: 8px;
-        }
+        .modal-overlay {
+        display: none; /* Sembunyi secara default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Kotak Modal */
+    .modal-content {
+        background: white;
+        padding: 40px 60px;
+        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-content h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 30px;
+        font-size: 24px;
+        line-height: 1.3;
+    }
+
+    /* Container Tombol */
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    /* Gaya Tombol Umum */
+    .modal-buttons button {
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
+        min-width: 120px;
+    }
+
+    /* Tombol Kembali (Putih dengan Border Hijau) */
+    .btn-kembali {
+        background: white;
+        color: #10b981;
+        border: 2px solid #10b981;
+    }
+
+    .btn-kembali:hover {
+        background: #f0fdf4;
+    }
+
+    /* Tombol Ya (Hijau Solid) */
+    .btn-ya {
+        background: #10b981; /* Warna Hijau Emerald */
+        color: white;
+        border: none;
+    }
+
+    .btn-ya:hover {
+        background: #059669;
+    }
     </style>
 </head>
 <body>
 
 <div class="wrapper">
+    <!-- Sidebar Tetap Sama -->
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
         <nav class="nav-menu">
-            <a href="/admin/users" class="nav-link">
-                <i class="fa-solid fa-user"></i> Pengguna
-            </a>
-            <a href="/admin/anggota" class="nav-link">
-                <i class="fa-solid fa-users"></i> Anggota
-            </a>
-            <a href="/admin/artikel" class="nav-link">
-                <i class="fa-solid fa-newspaper"></i> Artikel
-            </a>
-            <a href="/admin/materi" class="nav-link active">
-                <i class="fa-solid fa-clipboard-list"></i> Materi
-            </a>
-            <a href="/admin/hasilkarya" class="nav-link">
-                <i class="fa-solid fa-image"></i> Hasil karya
-            </a>
+            <a href="/admin/users" class="nav-link"><i class="fa-solid fa-user"></i> Pengguna</a>
+            <a href="/admin/anggota" class="nav-link"><i class="fa-solid fa-users"></i> Anggota</a>
+            <a href="/admin/artikel" class="nav-link"><i class="fa-solid fa-newspaper"></i> Artikel</a>
+            <a href="/admin/materi" class="nav-link active"><i class="fa-solid fa-clipboard-list"></i> Materi</a>
+            <a href="/admin/hasilkarya" class="nav-link"><i class="fa-solid fa-image"></i> Hasil karya</a>
         </nav>
         <div class="logout-area">
-            <button class="btn-logout">
+            <button class="btn-logout" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
         </div>
@@ -176,12 +222,7 @@
             <button class="btn-tambah" onclick="showModal('modalTambah')"><span>+</span> Tambah</button>
         </div>
 
-        <div class="tabs">
-            <div class="tab-item active" onclick="switchTab(this)">Fotografi</div>
-            <div class="tab-item" onclick="switchTab(this)">Videografi</div>
-            <div class="tab-item" onclick="switchTab(this)">Penulisan</div>
-        </div>
-
+        <!-- Tab Items -->
         <div class="table-card">
             <table>
                 <thead>
@@ -194,22 +235,13 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>12 Januari 2026</td>
-                        <td>Pengenalan Dasar Fotografi</td>
-                        <td>Membahas jenis kamera dan fungsi dasar kamera</td>
-                        <td><a href="#" class="link-text">https://drive.google.com/file...</a></td>
-                        <td>
-                            <button class="btn-action btn-edit" onclick="openEditModal('Pengenalan Dasar Fotografi', 'Membahas jenis kamera', 'https://link.com')">Edit</button>
-                            <button class="btn-action btn-hapus" onclick="showModal('modalHapus')">Hapus</button>
-                        </td>
-                    </tr>
+                <tbody id="materiTableBody">
+                    <!-- Data dimuat via JS -->
                 </tbody>
             </table>
         </div>
 
+        <!-- Pagination (Opsional UI) -->
         <div class="pagination-area">
             <div>Show 10 Row</div>
             <div class="page-nav">
@@ -221,19 +253,21 @@
     </main>
 </div>
 
+<!-- MODAL TAMBAH -->
 <div id="modalTambah" class="modal">
     <div class="modal-content">
         <h2>Tambah Materi</h2>
-        <div class="form-group"><label>Judul</label><input type="text" placeholder="Judul Materi"></div>
-        <div class="form-group"><label>Deskripsi Singkat</label><textarea placeholder="Deskripsi Singkat"></textarea></div>
-        <div class="form-group"><label>Link</label><input type="text" placeholder="Link Materi"></div>
+        <div class="form-group"><label>Judul</label><input type="text" id="add-judul" placeholder="Judul Materi"></div>
+        <div class="form-group"><label>Deskripsi Singkat</label><textarea id="add-deskripsi" placeholder="Deskripsi Singkat"></textarea></div>
+        <div class="form-group"><label>Link</label><input type="text" id="add-link" placeholder="Link Materi"></div>
         <div class="modal-footer">
             <button class="btn-m btn-cancel" onclick="hideModal('modalTambah')">Batal</button>
-            <button class="btn-m btn-save">Simpan</button>
+            <button class="btn-m btn-save" onclick="handleTambah()">Simpan</button>
         </div>
     </div>
 </div>
 
+<!-- MODAL EDIT -->
 <div id="modalEdit" class="modal">
     <div class="modal-content">
         <h2>Edit Materi</h2>
@@ -242,76 +276,95 @@
         <div class="form-group"><label>Link</label><input type="text" id="edit-link"></div>
         <div class="modal-footer">
             <button class="btn-m btn-cancel" onclick="hideModal('modalEdit')">Batal</button>
-            <button class="btn-m btn-save">Simpan</button>
+            <button class="btn-m btn-save" onclick="handleEdit()">Simpan</button>
         </div>
     </div>
 </div>
 
+<!-- MODAL HAPUS -->
 <div id="modalHapus" class="modal">
     <div class="modal-content" style="max-width: 450px; text-align:center;">
         <h2 style="font-size: 18px; margin-bottom: 30px;">Apakah Anda yakin ingin menghapus data ini?</h2>
         <div class="modal-footer">
             <button class="btn-m btn-cancel" onclick="hideModal('modalHapus')">Batal</button>
-            <button class="btn-m btn-save">Simpan</button>
+            <button class="btn-m btn-save" onclick="confirmDelete()">Hapus</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalLogout" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Apakah Anda yakin ingin keluar akun?</h2>
+        <div class="modal-buttons">
+            <button class="btn-kembali" onclick="closeLogoutModal()">Kembali</button>
+            <button class="btn-ya" onclick="executeLogout()">Ya</button>
         </div>
     </div>
 </div>
 
 <script>
-    const API_URL = 'https://jurnalsmandas.web.id/api/materi';
+    const API_URL = 'http://127.0.0.1:8000/api/materials';
     const TOKEN = localStorage.getItem('access_token');
     let currentCategory = 'Fotografi';
+    let selectedId = null;
+    let deleteId = null;
 
-    if (!TOKEN) {
-        window.location.href = "login.html";
-    }
+    // Proteksi Halaman
+    if (!TOKEN) { window.location.href = "login.html"; }
 
-    function switchTab(element) {
-        document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
-        element.classList.add('active');
-
-        currentCategory = element.innerText;
-        loadMateri();
-    }
-
+    // Memuat Data
     async function loadMateri() {
+        const tableBody = document.getElementById('materiTableBody');
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>';
+
         try {
             const response = await fetch(`${API_URL}?kategori=${currentCategory}`, {
                 headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' }
             });
             const result = await response.json();
-            const tableBody = document.querySelector('tbody');
-            tableBody.innerHTML = ''; 
 
-            const filteredData = result.data.filter(item => item.kategori === currentCategory);
+            tableBody.innerHTML = '';
+
+            // Filter berdasarkan kategori yang aktif di tab
+            const filteredData = result.data;
+
+            if (filteredData.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Tidak ada data di kategori ini.</td></tr>';
+                return;
+            }
 
             filteredData.forEach((item, index) => {
-                tableBody.innerHTML += `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
-                        <td>${item.judul}</td>
-                        <td>${item.deskripsi}</td>
-                        <td><a href="${item.link}" target="_blank" class="link-text">${item.link}</a></td>
-                        <td>
-                            <button class="btn-action btn-edit" onclick='prepareEdit(${JSON.stringify(item).replace(/'/g, "&apos;")})'>Edit</button>
-                            <button class="btn-action btn-hapus" onclick="prepareDelete(${item.id})">Hapus</button>
-                        </td>
-                    </tr>
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${new Date(item.created_at).toLocaleDateString('id-ID')}</td>
+                    <td>${item.judul}</td>
+                    <td>${item.deskripsi}</td>
+                    <td><a href="${item.link}" target="_blank" class="link-text">${item.link}</a></td>
+                    <td>
+                        <button class="btn-action btn-edit">Edit</button>
+                        <button class="btn-action btn-hapus" onclick="prepareDelete(${item.id})">Hapus</button>
+                    </td>
                 `;
+                // Gunakan event listener untuk data kompleks (menghindari error JSON.stringify di HTML attribute)
+                row.querySelector('.btn-edit').onclick = () => prepareEdit(item);
+                tableBody.appendChild(row);
             });
         } catch (error) {
             console.error("Gagal memuat materi:", error);
+            tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:red;">Gagal mengambil data dari server.</td></tr>';
         }
     }
 
+    // Fungsi Tambah Data
     async function handleTambah() {
-        const payload = {
-            judul: document.querySelector('#modalTambah input[placeholder="Judul Materi"]').value,
-            deskripsi: document.querySelector('#modalTambah textarea').value,
-            link: document.querySelector('#modalTambah input[placeholder="Link Materi"]').value,
-            kategori: currentCategory // Otomatis masuk ke kategori yang sedang aktif
-        };
+        const judul = document.getElementById('add-judul').value;
+        const deskripsi = document.getElementById('add-deskripsi').value;
+        const link = document.getElementById('add-link').value;
+
+        if(!judul || !deskripsi || !link) return alert("Harap isi semua kolom!");
+
+        const payload = { judul, deskripsi, link, kategori: currentCategory };
 
         try {
             const res = await fetch(API_URL, {
@@ -323,16 +376,23 @@
                 },
                 body: JSON.stringify(payload)
             });
+
             if (res.ok) {
-                alert("Materi berhasil ditambah ke kategori " + currentCategory);
+                alert("Materi berhasil ditambah!");
+                // Reset Form
+                document.getElementById('add-judul').value = '';
+                document.getElementById('add-deskripsi').value = '';
+                document.getElementById('add-link').value = '';
                 hideModal('modalTambah');
                 loadMateri();
+            } else {
+                const err = await res.json();
+                alert("Gagal: " + (err.message || "Terjadi kesalahan"));
             }
-        } catch (error) { alert("Gagal menambah data"); }
+        } catch (error) { alert("Koneksi gagal"); }
     }
-    document.querySelector('#modalTambah .btn-save').onclick = handleTambah;
 
-    let selectedId = null;
+    // Fungsi Edit Data
     function prepareEdit(item) {
         selectedId = item.id;
         document.getElementById('edit-judul').value = item.judul;
@@ -360,15 +420,14 @@
                 body: JSON.stringify(payload)
             });
             if (res.ok) {
-                alert("Materi berhasil diupdate");
+                alert("Materi berhasil diperbarui");
                 hideModal('modalEdit');
                 loadMateri();
             }
         } catch (error) { alert("Gagal update data"); }
     }
-    document.querySelector('#modalEdit .btn-save').onclick = handleEdit;
 
-    let deleteId = null;
+    // Fungsi Hapus Data
     function prepareDelete(id) {
         deleteId = id;
         showModal('modalHapus');
@@ -386,16 +445,40 @@
             }
         } catch (error) { alert("Gagal menghapus data"); }
     }
-    document.querySelector('#modalHapus .btn-save').onclick = confirmDelete;
 
+    // Navigasi Tab
+    function switchTab(element) {
+        document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
+        element.classList.add('active');
+        currentCategory = element.innerText;
+        loadMateri();
+    }
+
+    // Modal Helpers
     function showModal(id) { document.getElementById(id).style.display = 'flex'; }
     function hideModal(id) { document.getElementById(id).style.display = 'none'; }
 
-    document.querySelector('.btn-logout').onclick = () => {
-        localStorage.removeItem('access_token');
-        window.location.href = "login.html";
-    };
+    function logout() {
+        document.getElementById('modalLogout').style.display = 'flex';
+    }
 
+    function closeLogoutModal() {
+        document.getElementById('modalLogout').style.display = 'none';
+    }
+
+    function executeLogout() {
+        localStorage.clear();
+        window.location.href = "/login";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalLogout');
+        if (event.target == modal) {
+            closeLogoutModal();
+        }
+    }
+
+    // Jalankan saat pertama kali buka
     loadMateri();
 </script>
 

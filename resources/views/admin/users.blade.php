@@ -184,6 +184,7 @@
             font-weight: 600;
         }
 
+        .badge-admin { background: #fff5f5; color: #fa5252; border-color: #ffe3e3; }
         .badge-editor { background: #fff9db; color: #fab005; }
         .badge-author { background: #f8f9fa; color: #868e96; border: 1px solid #e9ecef; }
 
@@ -241,6 +242,79 @@
         .table-footer {
             display: flex; justify-content: space-between; align-items: center; margin-top: 20px;
         }
+
+        .modal-overlay {
+        display: none; /* Sembunyi secara default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Kotak Modal */
+    .modal-content {
+        background: white;
+        padding: 40px 60px;
+        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-content h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 30px;
+        font-size: 24px;
+        line-height: 1.3;
+    }
+
+    /* Container Tombol */
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    /* Gaya Tombol Umum */
+    .modal-buttons button {
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
+        min-width: 120px;
+    }
+
+    /* Tombol Kembali (Putih dengan Border Hijau) */
+    .btn-kembali {
+        background: white;
+        color: #10b981;
+        border: 2px solid #10b981;
+    }
+
+    .btn-kembali:hover {
+        background: #f0fdf4;
+    }
+
+    /* Tombol Ya (Hijau Solid) */
+    .btn-ya {
+        background: #10b981; /* Warna Hijau Emerald */
+        color: white;
+        border: none;
+    }
+
+    .btn-ya:hover {
+        background: #059669;
+    }
     </style>
 </head>
 <body>
@@ -268,7 +342,7 @@
             </a>
         </nav>
         <div class="logout-area">
-            <button class="btn-logout">
+            <button class="btn-logout" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
         </div>
@@ -298,27 +372,7 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <tr>
-                        <td>1</td>
-                        <td>Ilya Saruni</td>
-                        <td>saruniya@gmail.com</td>
-                        <td><span class="badge badge-editor">Editor</span></td>
-                        <td class="actions">
-                            <button class="btn-action btn-edit" onclick="showModal('modalEdit')">Edit</button>
-                            <button class="btn-action btn-hapus" onclick="showModal('modalHapus')">Hapus</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>Wildan Nugroho</td>
-                        <td>wildannugroho@gmail.com</td>
-                        <td><span class="badge badge-author">Author</span></td>
-                        <td class="actions">
-                            <button class="btn-action btn-edit" onclick="showModal('modalEdit')">Edit</button>
-                            <button class="btn-action btn-hapus" onclick="showModal('modalHapus')">Hapus</button>
-                        </td>
-                    </tr>
+                <tbody id="user-table-body">
                 </tbody>
             </table>
         </div>
@@ -349,9 +403,10 @@
         </div>
         <div class="form-group">
             <label>Peran</label>
-            <select>
-                <option>Author</option>
-                <option>Editor</option>
+            <select id="edit-role-id">
+                <option value="1">Admin</option>
+                <option value="2">Editor</option>
+                <option value="3">Author</option>
             </select>
         </div>
         <div class="modal-footer">
@@ -371,121 +426,238 @@
     </div>
 </div>
 
+<div id="modalLogout" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Apakah Anda yakin ingin keluar akun?</h2>
+        <div class="modal-buttons">
+            <button class="btn-kembali" onclick="closeLogoutModal()">Kembali</button>
+            <button class="btn-ya" onclick="executeLogout()">Ya</button>
+        </div>
+    </div>
+</div>
+
 <script>
-    const API_URL = 'https://jurnalsmandas.web.id/api/users';
-    const TOKEN = localStorage.getItem('access_token');
+    // --- KONFIGURASI API ---
+const BASE_URL = 'http://127.0.0.1:8000/api'; // Sesuaikan port kamu
+const API_URL = `${BASE_URL}/users`;
+const TOKEN = localStorage.getItem('access_token');
+const ROLE_ID = localStorage.getItem('role_id');
 
-    if (!TOKEN) {
-        window.location.href = "login.html";
-    }
+// --- 1. PROTEKSI HALAMAN ---
+// Hanya role_id 1 (Admin) yang boleh masuk, jika bukan admin tendang ke dashboard masing-masing
+if (!TOKEN || ROLE_ID !== "1") {
+    alert("Akses ditolak! Anda bukan Admin.");
+    window.location.href = "/login";
+}
 
-    async function loadUsers() {
-        try {
-            const response = await fetch(API_URL, {
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Accept': 'application/json'
+// Inisialisasi Nama Admin di Header
+document.addEventListener('DOMContentLoaded', () => {
+    const adminName = localStorage.getItem('user_name') || 'Admin';
+    document.querySelector('.admin-profile span').innerText = adminName;
+    loadUsers();
+});
+
+// --- 2. LOAD DATA USERS ---
+async function loadUsers() {
+    try {
+        const response = await fetch(API_URL, {
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (response.status === 401) return handleUnauthorized();
+
+        const result = await response.json();
+        const tableBody = document.querySelector('tbody');
+        tableBody.innerHTML = '';
+
+        const users = result.data || result;
+
+        if (Array.isArray(users)) {
+            users.forEach((user, index) => {
+                let roleName = '';
+                let badgeClass = '';
+
+                if (user.role_id == 1) {
+                    roleName = 'Admin';
+                    badgeClass = 'badge-admin';
+                } else if (user.role_id == 2) {
+                    roleName = 'Editor';
+                    badgeClass = 'badge-editor';
+                } else {
+                    roleName = 'Author';
+                    badgeClass = 'badge-author';
                 }
-            });
-            const result = await response.json();
-            const tableBody = document.querySelector('tbody');
-            tableBody.innerHTML = ''; // Bersihkan data dummy
 
-            result.data.forEach((user, index) => {
-                const badgeClass = user.role.toLowerCase() === 'editor' ? 'badge-editor' : 'badge-author';
-
+                // PERBAIKAN DI SINI:
+                // Kita kirim argumen satu per satu agar tidak rusak oleh JSON stringify
+                // Di dalam loop users.forEach pada function loadUsers()
                 tableBody.innerHTML += `
                     <tr>
                         <td>${index + 1}</td>
                         <td>${user.name}</td>
                         <td>${user.email}</td>
-                        <td><span class="badge ${badgeClass}">${user.role}</span></td>
+                        <td><span class="badge ${badgeClass}">${roleName}</span></td>
                         <td class="actions">
-                            <button class="btn-action btn-edit" onclick='prepareEdit(${JSON.stringify(user)})'>Edit</button>
-                            <button class="btn-action btn-hapus" onclick="prepareDelete(${user.id})">Hapus</button>
+                            <button class="btn-action btn-edit"
+                                onclick="handleEditClick(${user.id}, '${user.name}', '${user.email}', ${user.role_id})">
+                                <i class="fa-solid fa-pen"></i> Edit
+                            </button>
+                            <button class="btn-action btn-hapus" onclick="prepareDelete(${user.id})">
+                                <i class="fa-solid fa-trash"></i> Hapus
+                            </button>
                         </td>
                     </tr>
                 `;
             });
-        } catch (error) {
-            console.error("Gagal memuat data pengguna:", error);
         }
+    } catch (error) {
+        console.error("Gagal memuat data pengguna:", error);
     }
+}
 
-    let selectedUserId = null;
-
-    function prepareEdit(user) {
-        selectedUserId = user.id;
-        const modal = document.getElementById('modalEdit');
-        modal.querySelector('input[type="text"]').value = user.name;
-        modal.querySelector('input[type="email"]').value = user.email;
-        modal.querySelector('select').value = user.role;
-
-        modal.querySelector('input[type="text"]').readOnly = true;
-        modal.querySelector('input[type="email"]').readOnly = true;
-
-        showModal('modalEdit');
-    }
-
-    async function handleUpdateRole() {
-        const newRole = document.querySelector('#modalEdit select').value;
-
-        try {
-            const res = await fetch(`${API_URL}/${selectedUserId}`, {
-                method: 'PUT',
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ role: newRole })
-            });
-
-            if (res.ok) {
-                alert("Role pengguna berhasil diperbarui!");
-                hideModal('modalEdit');
-                loadUsers();
-            }
-        } catch (error) {
-            alert("Gagal memperbarui role");
-        }
-    }
-    // Pasang fungsi ke tombol simpan di modal edit
-    document.querySelector('#modalEdit .btn-simpan').onclick = handleUpdateRole;
-
-    let deleteUserId = null;
-
-    function prepareDelete(id) {
-        deleteUserId = id;
-        showModal('modalHapus');
-    }
-
-    async function confirmDelete() {
-        try {
-            const res = await fetch(`${API_URL}/${deleteUserId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${TOKEN}` }
-            });
-
-            if (res.ok) {
-                hideModal('modalHapus');
-                loadUsers();
-            }
-        } catch (error) {
-            alert("Gagal menghapus pengguna");
-        }
-    }
-    document.querySelector('#modalHapus .btn-simpan').onclick = confirmDelete;
-
-    document.querySelector('.btn-logout').onclick = () => {
-        localStorage.removeItem('access_token');
-        window.location.href = "login.html";
+// TAMBAHKAN FUNGSI BARU INI DI BAWAH loadUsers:
+function handleEditClick(id, name, email, role_id) {
+    console.log("Klik Edit untuk ID:", id);
+    const userObj = {
+        id: id,
+        name: name,
+        email: email,
+        role_id: role_id
     };
+    prepareEdit(userObj);
+}
 
-    function showModal(id) { document.getElementById(id).style.display = 'flex'; }
-    function hideModal(id) { document.getElementById(id).style.display = 'none'; }
+// --- 3. EDIT ROLE ---
+let selectedUserId = null;
 
-    loadUsers();
+function prepareEdit(user) {
+    // 1. Ambil ID dari object user yang diklik
+    selectedUserId = user.id;
+
+    // Debugging: Munculkan di console F12 untuk memastikan ID tidak null
+    console.log("User yang dipilih ID-nya adalah:", selectedUserId);
+
+    const modal = document.getElementById('modalEdit');
+
+    // 2. Isi input modal
+    modal.querySelector('input[type="text"]').value = user.name;
+    modal.querySelector('input[type="email"]').value = user.email;
+
+    // Pastikan ini menggunakan ID role (angka)
+    modal.querySelector('#edit-role-id').value = user.role_id;
+
+    showModal('modalEdit');
+}
+
+async function handleUpdateRole() {
+    if (!selectedUserId) {
+        alert("ID User tidak ditemukan! Silakan tutup modal dan klik edit lagi.");
+        return;
+    }
+
+    const newName = document.querySelector('#modalEdit input[type="text"]').value;
+    const newEmail = document.querySelector('#modalEdit input[type="email"]').value;
+    const newRoleId = document.querySelector('#edit-role-id').value;
+
+    const btn = document.querySelector('#modalEdit .btn-simpan');
+    btn.innerText = "Processing...";
+    btn.disabled = true;
+
+    try {
+        const res = await fetch(`${API_URL}/${selectedUserId}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                name: newName,
+                email: newEmail,
+                role_id: newRoleId
+            })
+        });
+
+        if (res.ok) {
+            alert("Data pengguna berhasil diperbarui!");
+            hideModal('modalEdit');
+            loadUsers();
+        } else {
+            const err = await res.json();
+            alert("Gagal: " + (err.message || "Terjadi kesalahan"));
+        }
+    } catch (error) {
+        alert("Gagal menghubungi server");
+    } finally {
+        btn.innerText = "Simpan";
+        btn.disabled = false;
+    }
+}
+
+// Pasang event listener ke tombol simpan
+document.querySelector('#modalEdit .btn-simpan').onclick = handleUpdateRole;
+
+// --- 4. HAPUS PENGGUNA ---
+let deleteUserId = null;
+
+function prepareDelete(id) {
+    deleteUserId = id;
+    showModal('modalHapus');
+}
+
+async function confirmDelete() {
+    try {
+        const res = await fetch(`${API_URL}/${deleteUserId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Accept': 'application/json'
+            }
+        });
+
+        if (res.ok) {
+            hideModal('modalHapus');
+            loadUsers();
+        } else {
+            alert("Gagal menghapus pengguna.");
+        }
+    } catch (error) {
+        alert("Gagal menghapus pengguna");
+    }
+}
+document.querySelector('#modalHapus .btn-simpan').onclick = confirmDelete;
+
+// --- UTILS & UI ---
+function handleUnauthorized() {
+    localStorage.clear();
+    window.location.href = "/login";
+}
+
+function logout() {
+        document.getElementById('modalLogout').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('modalLogout').style.display = 'none';
+    }
+
+    function executeLogout() {
+        localStorage.clear();
+        window.location.href = "/login";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalLogout');
+        if (event.target == modal) {
+            closeLogoutModal();
+        }
+    }
+
+function showModal(id) { document.getElementById(id).style.display = 'flex'; }
+function hideModal(id) { document.getElementById(id).style.display = 'none'; }
 </script>
 
 </body>
