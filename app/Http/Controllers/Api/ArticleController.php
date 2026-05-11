@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 
 class ArticleController extends Controller
 {
@@ -26,6 +27,52 @@ class ArticleController extends Controller
         $articles = $query->latest()->get();
         return ArticleResource::collection($articles);
     }
+
+    public function updateStatus(Request $request, $id)
+{
+    // Cek apakah user adalah admin/editor (sesuai role_id di sistemmu)
+    // Jika editor role_id-nya misal 1 atau 2, sesuaikan di sini
+    if (Auth::user()->role_id == 3) { // Contoh: 3 adalah penulis, maka penulis dilarang
+        return response()->json(['message' => 'Unauthorized'], 403);
+    }
+
+    $article = Article::findOrFail($id);
+
+    $request->validate([
+        'status' => 'required|in:accepted,rejected,published',
+        'message' => 'required_if:status,rejected|string', // Pesan wajib jika status ditolak
+        'title' => 'sometimes|string',
+        'content' => 'sometimes'
+    ]);
+
+    // Gunakan Transaction agar jika salah satu gagal, semua dibatalkan
+    return DB::transaction(function () use ($request, $article, $id) {
+
+        // 1. Update data artikel (termasuk judul/konten jika diedit editor)
+        $article->update([
+            'status' => $request->status,
+            'title' => $request->title ?? $article->title,
+            'content' => $request->content ?? $article->content,
+            'publish_date' => ($request->status === 'published') ? now() : $article->publish_date,
+        ]);
+
+        // 2. Jika statusnya rejected, masukkan alasan ke tabel comments
+        if ($request->status === 'rejected') {
+            DB::table('comments')->insert([
+                'article_id' => $id,
+                'user_id'    => Auth::id(), // ID Editor yang menolak
+                'message'    => $request->message,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        return response()->json([
+            'message' => "Article status updated to {$request->status}",
+            'data' => new ArticleResource($article)
+        ], 200);
+    });
+}
 
     public function store(Request $request)
     {
