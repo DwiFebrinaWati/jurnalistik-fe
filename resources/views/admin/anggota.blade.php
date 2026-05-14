@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* --- CSS TETAP SAMA --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root { --primary-emerald: #1da077; --light-emerald: #95d5c3; --soft-bg: #f8faf9; --sidebar-width: 260px; }
         body { background-color: var(--soft-bg); color: #333; }
@@ -70,81 +69,118 @@
         .btn-cancel { background: #fff; color: var(--primary-emerald); border: 1.5px solid var(--primary-emerald); }
         .btn-save { background: var(--primary-emerald); color: #fff; }
         .modal-overlay {
-        display: none; /* Sembunyi secara default */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        background: rgba(0, 0, 0, 0.4);
         z-index: 9999;
         justify-content: center;
         align-items: center;
     }
 
-    /* Kotak Modal */
-    .modal-content {
-        background: white;
-        padding: 40px 60px;
-        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
-        text-align: center;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-        max-width: 500px;
-        width: 90%;
-    }
+        .modal-content {
+            background: white;
+            padding: 40px 60px;
+            border-radius: 25px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            max-width: 500px;
+            width: 90%;
+        }
 
-    .modal-content h2 {
-        font-family: 'Poppins', sans-serif;
-        font-weight: 700;
-        color: #0d1b2a;
-        margin-bottom: 30px;
-        font-size: 24px;
-        line-height: 1.3;
-    }
+        .modal-content h2 {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 700;
+            color: #0d1b2a;
+            margin-bottom: 30px;
+            font-size: 24px;
+            line-height: 1.3;
+        }
 
-    /* Container Tombol */
-    .modal-buttons {
-        display: flex;
-        gap: 15px;
-        justify-content: center;
-    }
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
 
-    /* Gaya Tombol Umum */
-    .modal-buttons button {
-        padding: 10px 30px;
-        border-radius: 8px;
-        font-weight: 600;
-        cursor: pointer;
-        font-size: 16px;
-        transition: 0.3s;
-        min-width: 120px;
-    }
+        .modal-buttons button {
+            padding: 10px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+            min-width: 120px;
+        }
 
-    /* Tombol Kembali (Putih dengan Border Hijau) */
-    .btn-kembali {
-        background: white;
-        color: #10b981;
-        border: 2px solid #10b981;
-    }
+        .btn-kembali {
+            background: white;
+            color: #10b981;
+            border: 2px solid #10b981;
+        }
 
-    .btn-kembali:hover {
-        background: #f0fdf4;
-    }
+        .btn-kembali:hover {
+            background: #f0fdf4;
+        }
 
-    /* Tombol Ya (Hijau Solid) */
-    .btn-ya {
-        background: #10b981; /* Warna Hijau Emerald */
+        .btn-ya {
+            background: #10b981; /* Warna Hijau Emerald */
+            color: white;
+            border: none;
+        }
+
+        .btn-ya:hover {
+            background: #059669;
+        }
+
+    .menu-toggle {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: var(--primary-emerald);
         color: white;
         border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 20px;
     }
 
-    .btn-ya:hover {
-        background: #059669;
+    @media (max-width: 768px) {
+        .menu-toggle { display: block; }
+
+        .sidebar {
+            left: -100%;
+            transition: 0.3s;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .main-content {
+            margin-left: 0;
+            padding: 20px;
+            padding-top: 80px;
+        }
+
+        .page-header {
+            flex-direction: column;
+            gap: 15px;
+        }
     }
     </style>
 </head>
 
 <body>
+<button class="menu-toggle" onclick="toggleSidebar()">
+<i class="fa-solid fa-bars"></i>
+</button>
 <div class="wrapper">
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
@@ -191,14 +227,12 @@
                     </tr>
                 </thead>
                 <tbody id="anggota-table-body">
-                    <!-- Data dari API -->
                 </tbody>
             </table>
         </div>
     </main>
 </div>
 
-<!-- Modal Tambah -->
 <div id="modalTambah" class="modal">
     <div class="modal-content">
         <h2 style="text-align: center; margin-bottom: 20px;">Tambah Anggota</h2>
@@ -222,7 +256,6 @@
     </div>
 </div>
 
-<!-- Modal Edit -->
 <div id="modalEdit" class="modal">
     <div class="modal-content">
         <h2 style="text-align: center; margin-bottom: 20px;">Edit Anggota</h2>
@@ -247,7 +280,6 @@
     </div>
 </div>
 
-<!-- Modal Hapus -->
 <div id="modalHapus" class="modal">
     <div class="modal-content" style="text-align:center;">
         <input type="hidden" id="hapus-id">
@@ -270,12 +302,9 @@
 </div>
 
 <script>
-    // --- KONFIGURASI API ---
-// Sesuaikan port (8000/8001) dengan hasil 'php artisan serve' kamu
 const BASE_URL = 'http://127.0.0.1:8000/api';
 const API_URL = `${BASE_URL}/members`;
 
-// Fungsi untuk mendapatkan Header Autentikasi
 const getHeader = () => {
     const token = localStorage.getItem('access_token');
     return {
@@ -284,12 +313,10 @@ const getHeader = () => {
     };
 };
 
-// --- PROTEKSI HALAMAN ---
 if (!localStorage.getItem('access_token')) {
     window.location.href = "/login";
 }
 
-// --- 1. LOAD DATA ANGGOTA ---
 async function loadAnggota() {
     try {
         const response = await fetch(API_URL, {
@@ -303,14 +330,12 @@ async function loadAnggota() {
         const tableBody = document.getElementById('anggota-table-body');
         tableBody.innerHTML = '';
 
-        // Laravel biasanya membungkus data dalam 'data'
         const members = result.data || result;
 
         if (Array.isArray(members)) {
             members.forEach((item, index) => {
                 const badgeClass = item.status === 'Mentor' ? 'badge-mentor' : 'badge-anggota';
 
-                // Logika Foto: Cek apakah path dari storage atau URL luar
                 let foto = `https://ui-avatars.com/api/?name=${item.fullName}&background=random`;
                 if (item.photo) {
                     foto = item.photo.startsWith('http') ? item.photo : `http://127.0.0.1:8000/storage/${item.photo}`;
@@ -336,7 +361,6 @@ async function loadAnggota() {
     }
 }
 
-// --- 2. TAMBAH DATA ---
 document.getElementById('formTambah').addEventListener('submit', async (e) => {
     e.preventDefault();
     const btn = document.getElementById('btn-save-tambah');
@@ -356,7 +380,7 @@ document.getElementById('formTambah').addEventListener('submit', async (e) => {
     try {
         const res = await fetch(API_URL, {
             method: 'POST',
-            headers: getHeader(), // Tanpa Content-Type karena FormData
+            headers: getHeader(),
             body: formData
         });
 
@@ -378,7 +402,6 @@ document.getElementById('formTambah').addEventListener('submit', async (e) => {
     }
 });
 
-// --- 3. EDIT & UPDATE DATA ---
 function prepareEdit(item) {
     document.getElementById('edit-id').value = item.id || item.members_id;
     document.getElementById('edit-fullName').value = item.fullName;
@@ -401,7 +424,7 @@ document.getElementById('formEdit').addEventListener('submit', async (e) => {
     btn.disabled = true;
 
     const formData = new FormData();
-    formData.append('_method', 'PUT'); // WAJIB untuk Laravel saat update via FormData
+    formData.append('_method', 'PUT');
     formData.append('fullName', document.getElementById('edit-fullName').value);
     formData.append('phoneNumber', document.getElementById('edit-phoneNumber').value);
     formData.append('status', document.getElementById('edit-status').value);
@@ -413,7 +436,7 @@ document.getElementById('formEdit').addEventListener('submit', async (e) => {
 
     try {
         const res = await fetch(`${API_URL}/${id}`, {
-            method: 'POST', // Gunakan POST + _method PUT
+            method: 'POST',
             headers: getHeader(),
             body: formData
         });
@@ -434,7 +457,6 @@ document.getElementById('formEdit').addEventListener('submit', async (e) => {
     }
 });
 
-// --- 4. HAPUS DATA ---
 function prepareDelete(id) {
     document.getElementById('hapus-id').value = id;
     showModal('modalHapus');
@@ -459,7 +481,6 @@ async function confirmDelete() {
     }
 }
 
-// --- UTILS & UI ---
 function handleUnauthorized() {
     localStorage.clear();
     window.location.href = "/login";
@@ -499,8 +520,28 @@ function previewImage(input, targetId) {
     }
 }
 
-// Jalankan saat halaman dibuka
 window.onload = loadAnggota;
+
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle i');
+
+    sidebar.classList.toggle('active');
+
+    if (sidebar.classList.contains('active')) {
+        toggleBtn.classList.replace('fa-bars', 'fa-xmark');
+    } else {
+        toggleBtn.classList.replace('fa-xmark', 'fa-bars');
+    }
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    });
+});
 </script>
 </body>
 </html>

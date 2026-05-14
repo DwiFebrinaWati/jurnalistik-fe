@@ -47,7 +47,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Invalid credentials'], 401);
         }
 
-        $user->tokens()->delete(); // Revoke existing tokens
+        $user->tokens()->delete();
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
@@ -56,7 +56,7 @@ class AuthController extends Controller
         'token_type' => 'Bearer',
         'user' => [
             'name' => $user->name,
-            'role_id' => $user->role_id 
+            'role_id' => $user->role_id
         ]
     ]);
 }
@@ -72,8 +72,6 @@ class AuthController extends Controller
     {
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
-
-            // Cari user berdasarkan email, jika tidak ada maka buat baru
             $user = User::firstOrCreate(
                 ['email' => $googleUser->getEmail()],
                 [
@@ -87,7 +85,7 @@ class AuthController extends Controller
 
             return response()->json([
             'message' => 'Login Google Berhasil',
-            'user' => new UserResource($user), // Gunakan Resource di sini
+            'user' => new UserResource($user), 
             'access_token' => $token,
             'token_type' => 'Bearer'
         ]);

@@ -17,7 +17,6 @@
             height: 100%;
         }
 
-        /* Background Full Screen */
         .bg-container {
             background-image: url('/images/camera-bg.jpg');
             background-size: cover;
@@ -37,7 +36,6 @@
             background: rgba(0, 0, 0, 0.2);
         }
 
-        /* Kartu Login */
         .login-card {
             background: white;
             width: 100%;
@@ -97,7 +95,6 @@
             border: 2px solid #333;
         }
 
-        /* Tombol Login */
         .btn-login {
             width: 100%;
             padding: 14px;
@@ -169,7 +166,6 @@
     </div>
 
     <script>
-    // 1. Sesuaikan PORT dengan yang muncul di terminal kamu (8000 atau 8001)
     const BASE_URL = 'http://127.0.0.1:8000/api';
 
     const loginForm = document.getElementById('login-form');
@@ -185,7 +181,6 @@
         btnSubmit.disabled = true;
 
         try {
-            // Gunakan BASE_URL yang sudah didefinisikan
             const response = await fetch(`${BASE_URL}/login`, {
                 method: 'POST',
                 headers: {
@@ -203,37 +198,30 @@
 
             if (response.ok) {
             if (result.access_token) {
-                // 1. Simpan Token dan Role ke LocalStorage
                 localStorage.setItem('access_token', result.access_token);
                 localStorage.setItem('role_id', result.user.role_id);
 
                 alert("Berhasil Login!");
 
-                // 2. Logika Pengalihan Berdasarkan Role
                 const roleId = result.user.role_id;
 
                 if (roleId == 1) {
-                    // Admin: Ke dashboard utama
                     window.location.href = "admin/users";
                 } else if (roleId == 2) {
-                    // Editor: Ke halaman artikel editor
                     window.location.href = "editor/artikel";
                 } else if (roleId == 3) {
-                    // Author: Ke halaman artikel author
                     window.location.href = "author/artikel";
                 } else {
                     alert("Role tidak dikenali!");
                 }
             }
                 } else {
-                    // Menangani pesan error dari Laravel (401 atau validasi)
                     alert("Gagal Login: " + (result.message || "Email atau password salah."));
                 }
             } catch (error) {
                 console.error("Fetch Error:", error);
                 alert("Error: Tidak bisa terhubung ke server. Pastikan 'php artisan serve --port=8001' sudah jalan.");
             } finally {
-                // Mengembalikan tombol ke keadaan semula
                 btnSubmit.innerText = "Login";
                 btnSubmit.disabled = false;
             }

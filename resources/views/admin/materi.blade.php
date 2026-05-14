@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root {
             --primary-emerald: #1da077;
@@ -17,11 +16,7 @@
             --sidebar-width: 260px;
         }
         body { background-color: var(--soft-bg); color: #333; }
-
-        /* --- LAYOUT --- */
         .wrapper { display: flex; min-height: 100vh; }
-
-        /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-width); background: #fff; display: flex;
             flex-direction: column; border-right: 1px solid #edf2f0;
@@ -44,8 +39,6 @@
             border: 1.5px solid #d1d9d6; border-radius: 12px;
             cursor: pointer; color: #666; font-weight: 600;
         }
-
-        /* --- MAIN CONTENT --- */
         .main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; }
         .header-top { display: flex; justify-content: flex-end; margin-bottom: 30px; }
         .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
@@ -60,8 +53,6 @@
             padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; gap: 8px;
         }
-
-        /* --- TAB SYSTEM --- */
         .tabs { display: flex; gap: 15px; margin-bottom: 25px; }
         .tab-item {
             padding: 8px 25px; border-radius: 8px; border: 1px solid #e0e0e0;
@@ -70,8 +61,6 @@
         }
         .tab-item:hover { border-color: var(--primary-emerald); color: var(--primary-emerald); background-color: #f0fdf9; }
         .tab-item.active { background-color: var(--primary-emerald); border-color: var(--primary-emerald); color: #fff; }
-
-        /* --- TABLE --- */
         .table-card { background: #fff; border-radius: 15px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }
         table { width: 100%; border-collapse: collapse; }
         thead { background-color: var(--light-emerald); }
@@ -82,8 +71,6 @@
         .btn-action { padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
         .btn-edit { background: #edf2ff; color: #4c6ef5; border-color: #dbe4ff; margin-right: 5px; }
         .btn-hapus { background: #fff5f5; color: #fa5252; border-color: #ffe3e3; }
-
-        /* --- MODAL --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); display: none; align-items: center;
@@ -113,23 +100,22 @@
         .btn-logout i { margin-right: 8px; }
 
         .modal-overlay {
-        display: none; /* Sembunyi secara default */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        background: rgba(0, 0, 0, 0.4);
         z-index: 9999;
         justify-content: center;
         align-items: center;
     }
 
-    /* Kotak Modal */
     .modal-content {
         background: white;
         padding: 40px 60px;
-        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        border-radius: 25px;
         text-align: center;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         max-width: 500px;
@@ -145,14 +131,12 @@
         line-height: 1.3;
     }
 
-    /* Container Tombol */
     .modal-buttons {
         display: flex;
         gap: 15px;
         justify-content: center;
     }
 
-    /* Gaya Tombol Umum */
     .modal-buttons button {
         padding: 10px 30px;
         border-radius: 8px;
@@ -163,7 +147,6 @@
         min-width: 120px;
     }
 
-    /* Tombol Kembali (Putih dengan Border Hijau) */
     .btn-kembali {
         background: white;
         color: #10b981;
@@ -174,9 +157,8 @@
         background: #f0fdf4;
     }
 
-    /* Tombol Ya (Hijau Solid) */
     .btn-ya {
-        background: #10b981; /* Warna Hijau Emerald */
+        background: #10b981;
         color: white;
         border: none;
     }
@@ -184,10 +166,50 @@
     .btn-ya:hover {
         background: #059669;
     }
+
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary-emerald);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle { display: block; }
+    .sidebar {
+        left: -100%;
+        transition: 0.3s;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+        padding-top: 80px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
     </style>
 </head>
 <body>
-
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
 <div class="wrapper">
     <!-- Sidebar Tetap Sama -->
     <aside class="sidebar">
@@ -240,8 +262,6 @@
                 </tbody>
             </table>
         </div>
-
-        <!-- Pagination (Opsional UI) -->
         <div class="pagination-area">
             <div>Show 10 Row</div>
             <div class="page-nav">
@@ -253,7 +273,6 @@
     </main>
 </div>
 
-<!-- MODAL TAMBAH -->
 <div id="modalTambah" class="modal">
     <div class="modal-content">
         <h2>Tambah Materi</h2>
@@ -267,7 +286,6 @@
     </div>
 </div>
 
-<!-- MODAL EDIT -->
 <div id="modalEdit" class="modal">
     <div class="modal-content">
         <h2>Edit Materi</h2>
@@ -281,7 +299,6 @@
     </div>
 </div>
 
-<!-- MODAL HAPUS -->
 <div id="modalHapus" class="modal">
     <div class="modal-content" style="max-width: 450px; text-align:center;">
         <h2 style="font-size: 18px; margin-bottom: 30px;">Apakah Anda yakin ingin menghapus data ini?</h2>
@@ -308,11 +325,8 @@
     let currentCategory = 'Fotografi';
     let selectedId = null;
     let deleteId = null;
-
-    // Proteksi Halaman
     if (!TOKEN) { window.location.href = "login.html"; }
 
-    // Memuat Data
     async function loadMateri() {
         const tableBody = document.getElementById('materiTableBody');
         tableBody.innerHTML = '<tr><td colspan="6" style="text-align:center;">Memuat data...</td></tr>';
@@ -325,7 +339,6 @@
 
             tableBody.innerHTML = '';
 
-            // Filter berdasarkan kategori yang aktif di tab
             const filteredData = result.data;
 
             if (filteredData.length === 0) {
@@ -346,7 +359,6 @@
                         <button class="btn-action btn-hapus" onclick="prepareDelete(${item.id})">Hapus</button>
                     </td>
                 `;
-                // Gunakan event listener untuk data kompleks (menghindari error JSON.stringify di HTML attribute)
                 row.querySelector('.btn-edit').onclick = () => prepareEdit(item);
                 tableBody.appendChild(row);
             });
@@ -356,7 +368,6 @@
         }
     }
 
-    // Fungsi Tambah Data
     async function handleTambah() {
         const judul = document.getElementById('add-judul').value;
         const deskripsi = document.getElementById('add-deskripsi').value;
@@ -392,7 +403,6 @@
         } catch (error) { alert("Koneksi gagal"); }
     }
 
-    // Fungsi Edit Data
     function prepareEdit(item) {
         selectedId = item.id;
         document.getElementById('edit-judul').value = item.judul;
@@ -427,7 +437,6 @@
         } catch (error) { alert("Gagal update data"); }
     }
 
-    // Fungsi Hapus Data
     function prepareDelete(id) {
         deleteId = id;
         showModal('modalHapus');
@@ -446,7 +455,6 @@
         } catch (error) { alert("Gagal menghapus data"); }
     }
 
-    // Navigasi Tab
     function switchTab(element) {
         document.querySelectorAll('.tab-item').forEach(tab => tab.classList.remove('active'));
         element.classList.add('active');
@@ -454,7 +462,6 @@
         loadMateri();
     }
 
-    // Modal Helpers
     function showModal(id) { document.getElementById(id).style.display = 'flex'; }
     function hideModal(id) { document.getElementById(id).style.display = 'none'; }
 
@@ -478,9 +485,28 @@
         }
     }
 
-    // Jalankan saat pertama kali buka
     loadMateri();
-</script>
 
+    function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle i');
+
+    sidebar.classList.toggle('active');
+
+    if (sidebar.classList.contains('active')) {
+        toggleBtn.classList.replace('fa-bars', 'fa-xmark');
+    } else {
+        toggleBtn.classList.replace('fa-xmark', 'fa-bars');
+    }
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    });
+});
+</script>
 </body>
 </html>

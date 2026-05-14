@@ -20,7 +20,6 @@ class ArticleController extends Controller
         if ($request->has('status')) {
         $status = $request->status;
 
-        // Pemetaan jika teks dari JS berbeda dengan di Database
         if ($status === 'diterima') {
             $query->where('status', 'accepted');
         } elseif ($status === 'dipublish') {
@@ -38,9 +37,7 @@ class ArticleController extends Controller
 
     public function updateStatus(Request $request, $id)
 {
-    // Cek apakah user adalah admin/editor (sesuai role_id di sistemmu)
-    // Jika editor role_id-nya misal 1 atau 2, sesuaikan di sini
-    if (Auth::user()->role_id == 3) { // Contoh: 3 adalah penulis, maka penulis dilarang
+    if (Auth::user()->role_id == 3) {
         return response()->json(['message' => 'Unauthorized'], 403);
     }
 
@@ -48,15 +45,12 @@ class ArticleController extends Controller
 
     $request->validate([
         'status' => 'required|in:accepted,rejected,published',
-        'message' => 'required_if:status,rejected|string', // Pesan wajib jika status ditolak
+        'message' => 'required_if:status,rejected|string',
         'title' => 'sometimes|string',
         'content' => 'sometimes'
     ]);
 
-    // Gunakan Transaction agar jika salah satu gagal, semua dibatalkan
     return DB::transaction(function () use ($request, $article, $id) {
-
-        // 1. Update data artikel (termasuk judul/konten jika diedit editor)
         $article->update([
             'status' => $request->status,
             'title' => $request->title ?? $article->title,
@@ -64,11 +58,10 @@ class ArticleController extends Controller
             'publish_date' => ($request->status === 'published') ? now() : $article->publish_date,
         ]);
 
-        // 2. Jika statusnya rejected, masukkan alasan ke tabel comments
         if ($request->status === 'rejected') {
             DB::table('comments')->insert([
                 'article_id' => $id,
-                'user_id'    => Auth::id(), // ID Editor yang menolak
+                'user_id'    => Auth::id(), 
                 'message'    => $request->message,
                 'created_at' => now(),
                 'updated_at' => now(),

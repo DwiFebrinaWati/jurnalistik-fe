@@ -6,7 +6,6 @@
     <title>Lupa Password - Jurnalistik</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* ... CSS Tetap Sama ... */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         .bg-overlay { background-image: url('/images/camera-bg.jpg'); background-size: cover; background-position: center; height: 100vh; width: 100%; display: flex; align-items: center; justify-content: center; }
         .card { background: white; width: 90%; max-width: 500px; padding: 50px 40px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); text-align: center; }
@@ -45,8 +44,6 @@
     </div>
 
 <script>
-    // --- KONFIGURASI API LOKAL ---
-    // Sesuaikan port dengan backend kamu (8001)
     const FORGOT_PASSWORD_URL = 'http://127.0.0.1:8001/api/forgot-password';
 
     async function handleForgotPassword(event) {
@@ -75,7 +72,6 @@
             if (response.ok) {
                 alert("Link reset password telah dikirim ke email Anda. Silakan cek kotak masuk.");
             } else {
-                // Laravel akan mengirim pesan error jika email tidak ditemukan
                 alert(result.message || "Gagal mengirim email. Pastikan email Anda terdaftar.");
             }
         } catch (error) {

@@ -9,10 +9,8 @@ class MaterialController extends Controller
 {
     public function index()
     {
-        // Mengambil semua materi
         $materials = Material::all();
 
-        // Transformasi data agar sesuai dengan JS kamu
         $data = $materials->map(function ($item) {
             return [
                 'id' => $item->material_id,
@@ -20,8 +18,6 @@ class MaterialController extends Controller
                 'deskripsi' => $item->description,
                 'link' => $item->googleDriveLink,
                 'created_at' => $item->created_at,
-                // Tambahkan kategori jika ada di database, jika belum ada,
-                // kita asumsikan sementara sesuai input agar tidak error di filter JS
                 'kategori' => $item->category ?? 'Fotografi',
             ];
         });
@@ -31,8 +27,6 @@ class MaterialController extends Controller
 
     public function store(Request $request)
     {
-        // Ingat: Database kamu kolomnya 'title', 'description', 'googleDriveLink'
-        // Tapi JS kamu kirimnya 'judul', 'deskripsi', 'link'
 
         $request->validate([
             'judul' => 'required',
@@ -45,7 +39,6 @@ class MaterialController extends Controller
                 'title' => $request->judul,
                 'description' => $request->deskripsi,
                 'googleDriveLink' => $request->link,
-                // 'category' => $request->kategori // Tambahkan jika ada kolomnya
             ]);
 
             return response()->json(['success' => true, 'data' => $material], 201);

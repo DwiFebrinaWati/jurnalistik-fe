@@ -6,7 +6,6 @@
     <title>Register - Jurnalistik</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
-        /* Base Reset */
         * {
             margin: 0;
             padding: 0;
@@ -93,7 +92,6 @@
             border-color: #1da077;
         }
 
-        /* Tombol Register */
         .btn-submit {
             width: 100%;
             padding: 14px;
@@ -181,7 +179,6 @@
     </div>
 
 <script>
-    // --- KONFIGURASI API LOKAL ---
     const REGISTER_URL = 'http://127.0.0.1:8000/api/register';
 
     async function handleRegister(event) {
@@ -192,8 +189,6 @@
         const password = document.getElementById('password').value;
         const confirmPassword = document.getElementById('confirm_password').value;
         const submitBtn = document.querySelector('.btn-submit');
-
-        // Validasi Sederhana
         if (password !== confirmPassword) {
             alert("Password dan Konfirmasi Password tidak cocok!");
             return;
@@ -227,10 +222,8 @@
 
             if (response.ok) {
                 alert("Registrasi Berhasil! Silakan login untuk melanjutkan.");
-                // Arahkan ke file login lokal kamu
                 window.location.href = "/login";
             } else {
-                // Tampilkan pesan error spesifik dari Laravel (misal email sudah ada)
                 alert(result.message || "Registrasi gagal. Periksa kembali data Anda.");
             }
         } catch (error) {

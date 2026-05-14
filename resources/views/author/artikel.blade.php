@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* CSS tetap sama sesuai permintaan (JANGAN MENGUBAH TAMPILAN) */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root {
             --primary-emerald: #1da077;
@@ -104,23 +103,22 @@
             border: none !important;
         }
         .modal-overlay {
-        display: none; /* Sembunyi secara default */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        background: rgba(0, 0, 0, 0.4);
         z-index: 9999;
         justify-content: center;
         align-items: center;
     }
 
-    /* Kotak Modal */
     .modal-content {
         background: white;
         padding: 40px 60px;
-        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        border-radius: 25px;
         text-align: center;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         max-width: 500px;
@@ -136,14 +134,12 @@
         line-height: 1.3;
     }
 
-    /* Container Tombol */
     .modal-buttons {
         display: flex;
         gap: 15px;
         justify-content: center;
     }
 
-    /* Gaya Tombol Umum */
     .modal-buttons button {
         padding: 10px 30px;
         border-radius: 8px;
@@ -154,7 +150,6 @@
         min-width: 120px;
     }
 
-    /* Tombol Kembali (Putih dengan Border Hijau) */
     .btn-kembali {
         background: white;
         color: #10b981;
@@ -165,9 +160,8 @@
         background: #f0fdf4;
     }
 
-    /* Tombol Ya (Hijau Solid) */
     .btn-ya {
-        background: #10b981; /* Warna Hijau Emerald */
+        background: #10b981;
         color: white;
         border: none;
     }
@@ -175,10 +169,51 @@
     .btn-ya:hover {
         background: #059669;
     }
+
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary-emerald);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle { display: block; }
+
+    .sidebar {
+        left: -100%;
+        transition: 0.3s;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+        padding-top: 80px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
     </style>
 </head>
 <body>
-
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
 <div class="wrapper">
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
@@ -222,11 +257,9 @@
             </div>
 
             <div class="artikel-grid" id="article-container">
-                <!-- Data akan dimuat via JS -->
             </div>
         </div>
 
-        <!-- EDITOR VIEW -->
         <div id="editor-view">
             <div class="editor-header-btns">
                 <button class="btn-save" onclick="handleSave(false)">Simpan Draf</button>
@@ -252,7 +285,6 @@
     </main>
 </div>
 
-<!-- Modal Konfirmasi Hapus -->
 <div id="modalHapus" class="modal">
     <div class="modal-content">
         <h2>Apakah Anda yakin ingin menghapus artikel ini?</h2>
@@ -274,7 +306,7 @@
 </div>
 
 <script>
-    const BASE_URL = "http://127.0.0.1:8000/api"; // Pastikan ini sesuai URL backend Laravel-mu
+    const BASE_URL = "http://127.0.0.1:8000/api";
     const API_URL = `${BASE_URL}/articles`;
     const TOKEN = localStorage.getItem('access_token');
     const userData = JSON.parse(localStorage.getItem('user_data'));
@@ -403,7 +435,7 @@
         }
     }
 
-    const photo = data.photo || data.thumbnail; // Cek field photo
+    const photo = data.photo || data.thumbnail;
     if (photo) {
         const imgPath = photo.startsWith('http') ? photo : `${ROOT_URL}/storage/${photo}`;
         document.getElementById('preview-box').innerHTML = `<img src="${imgPath}" style="width:100%; height:100%; object-fit:cover;">`;
@@ -487,7 +519,6 @@
         } catch (e) { alert("Error koneksi."); }
     }
 
-    /** UTILS **/
     function showEditor() {
         document.getElementById('list-view').style.display = 'none';
         document.getElementById('editor-view').style.display = 'block';
@@ -537,6 +568,27 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => loadArticles('disimpan'));
+
+    function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle i');
+
+    sidebar.classList.toggle('active');
+
+    if (sidebar.classList.contains('active')) {
+        toggleBtn.classList.replace('fa-bars', 'fa-xmark');
+    } else {
+        toggleBtn.classList.replace('fa-xmark', 'fa-bars');
+    }
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    });
+});
 </script>
 </body>
 </html>

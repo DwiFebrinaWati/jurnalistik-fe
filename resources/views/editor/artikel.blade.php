@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root {
             --primary-emerald: #1da077;
@@ -16,11 +15,8 @@
             --sidebar-width: 260px;
         }
         body { background-color: var(--soft-bg); color: #333; }
-
-        /* --- LAYOUT --- */
         .wrapper { display: flex; min-height: 100vh; }
 
-        /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-width); background: #fff; display: flex;
             flex-direction: column; border-right: 1px solid #edf2f0;
@@ -43,14 +39,11 @@
             border: 1.5px solid #d1d9d6; border-radius: 12px;
             cursor: pointer; color: #666; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-
-        /* --- MAIN CONTENT --- */
         .main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; }
         .header-top { display: flex; justify-content: flex-end; margin-bottom: 30px; }
         .user-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
         .user-profile img { width: 35px; height: 35px; border-radius: 50%; }
 
-        /* --- DASHBOARD VIEW --- */
         .page-header { margin-bottom: 25px; }
         .page-header h1 { font-size: 28px; font-weight: 700; color: #1a1c1b; }
         .page-header p { color: #9ca3af; font-size: 14px; }
@@ -76,7 +69,6 @@
         .card-body h3 { font-size: 13px; font-weight: 700; color: #1a1c1b; margin-bottom: 8px; line-height: 1.4; }
         .card-meta { font-size: 11px; color: #9ca3af; }
 
-        /* --- DETAIL VIEW  --- */
         #detail-view { display: none; }
         .btn-back { background: transparent; border: none; color: var(--primary-emerald); cursor: pointer; font-weight: 600; margin-bottom: 15px; font-size: 14px; display: flex; align-items: center; gap: 5px; }
 
@@ -91,7 +83,6 @@
         .detail-img { width: 250px; border-radius: 10px; margin-bottom: 25px; }
         .detail-isi { font-size: 15px; line-height: 1.8; color: #444; text-align: justify; }
 
-        /* --- MODAL --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000;
@@ -111,23 +102,22 @@
         }
 
         .modal-overlay {
-        display: none; /* Sembunyi secara default */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        background: rgba(0, 0, 0, 0.4);
         z-index: 9999;
         justify-content: center;
         align-items: center;
     }
 
-    /* Kotak Modal */
     .modal-content {
         background: white;
         padding: 40px 60px;
-        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        border-radius: 25px;
         text-align: center;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         max-width: 500px;
@@ -143,14 +133,12 @@
         line-height: 1.3;
     }
 
-    /* Container Tombol */
     .modal-buttons {
         display: flex;
         gap: 15px;
         justify-content: center;
     }
 
-    /* Gaya Tombol Umum */
     .modal-buttons button {
         padding: 10px 30px;
         border-radius: 8px;
@@ -161,7 +149,6 @@
         min-width: 120px;
     }
 
-    /* Tombol Kembali (Putih dengan Border Hijau) */
     .btn-kembali {
         background: white;
         color: #10b981;
@@ -172,9 +159,8 @@
         background: #f0fdf4;
     }
 
-    /* Tombol Ya (Hijau Solid) */
     .btn-ya {
-        background: #10b981; /* Warna Hijau Emerald */
+        background: #10b981;
         color: white;
         border: none;
     }
@@ -182,10 +168,51 @@
     .btn-ya:hover {
         background: #059669;
     }
-    </style>
+
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary-emerald);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle { display: block; }
+
+    .sidebar {
+        left: -100%;
+        transition: 0.3s;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+        padding-top: 80px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
 </head>
 <body>
-
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
 <div class="wrapper">
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
@@ -291,7 +318,6 @@
     const ROOT_URL = "http://127.0.0.1:8000";
 
     let currentArticleId = null;
-    // Set default status agar "Diajukan" aktif di awal
     let activeStatus = 'submitted';
 
     if (!TOKEN) { window.location.href = "/login"; }
@@ -299,7 +325,6 @@
     function renderTabs(mode = 'dashboard') {
         const tabsContainer = document.getElementById('tabs-container');
 
-        // Mapping label dan status sesuai permintaanmu
         const allTabs = [
             { label: 'Diajukan', status: 'submitted' },
             { label: 'Diterima', status: 'accepted' },
@@ -309,7 +334,6 @@
 
         tabsContainer.innerHTML = '';
 
-        // Tampilkan semua 4 tab di dashboard
         const filteredTabs = allTabs;
 
         filteredTabs.forEach(tab => {
@@ -373,7 +397,6 @@
 
             const isReadOnly = activeStatus !== 'submitted';
 
-            // KONSEP: BISA EDIT (readOnly = false)
             const judulInput = document.getElementById('edit-judul');
             const isiInput = document.getElementById('edit-isi');
 
@@ -383,7 +406,6 @@
             isiInput.value = art.full_content || art.content || '';
             isiInput.readOnly = isReadOnly;
 
-            // Preview Gambar
             const fileGambar = art.photo || art.thumbnail || art.image;
             let gambarUrl = 'https://via.placeholder.com/400x225?text=No+Image';
             if (fileGambar) {
@@ -391,15 +413,12 @@
             }
             document.getElementById('edit-img').src = gambarUrl;
 
-            // Meta Info
             const authorName = art.author ? art.author.name : 'Anonim';
             const tanggal = art.timestamps?.created_at || '-';
             document.getElementById('edit-meta').innerText = `${authorName} | ${tanggal}`;
 
-            // Sembunyikan Tabs saat fokus edit detail
             document.getElementById('tabs-container').innerHTML = '';
 
-            // Update Label Tombol Aksi Utama
             const btnPrimary = document.getElementById('btn-action-primary');
             const btnReject = document.getElementById('btn-tolak');
 
@@ -466,11 +485,11 @@ async function handleReject() {
             headers: {
                 'Authorization': `Bearer ${TOKEN}`,
                 'Content-Type': 'application/json',
-                'Accept': 'application/json' // Tambahkan ini agar Laravel kirim error JSON jika validasi gagal
+                'Accept': 'application/json'
             },
             body: JSON.stringify({
                 status: 'rejected',
-                message: note // HARUS "message" agar dibaca oleh $request->message di Controller
+                message: note
             })
         });
 
@@ -504,10 +523,9 @@ async function handleReject() {
 
     document.addEventListener('DOMContentLoaded', () => {
         renderTabs('dashboard');
-        loadArticles('submitted'); // Otomatis muat status submitted saat pertama buka
+        loadArticles('submitted');
     });
 
-    // Menghubungkan tombol konfirmasi di dalam modal
     const confirmRejectBtn = document.querySelector('#modalRevisi .btn-terima');
     if (confirmRejectBtn) {
         confirmRejectBtn.onclick = handleReject;
@@ -532,7 +550,27 @@ async function handleReject() {
             closeLogoutModal();
         }
     }
-</script>
 
+function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle i');
+
+    sidebar.classList.toggle('active');
+
+    if (sidebar.classList.contains('active')) {
+        toggleBtn.classList.replace('fa-bars', 'fa-xmark');
+    } else {
+        toggleBtn.classList.replace('fa-xmark', 'fa-bars');
+    }
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    });
+});
+</script>
 </body>
 </html>

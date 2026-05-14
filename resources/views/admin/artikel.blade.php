@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root {
             --primary-emerald: #1da077;
@@ -15,11 +14,7 @@
             --sidebar-width: 260px;
         }
         body { background-color: var(--soft-bg); color: #333; }
-
-        /* --- LAYOUT --- */
         .wrapper { display: flex; min-height: 100vh; }
-
-        /* --- SIDEBAR (Konsisten) --- */
         .sidebar {
             width: var(--sidebar-width); background: #fff; display: flex;
             flex-direction: column; border-right: 1px solid #edf2f0;
@@ -42,32 +37,24 @@
             border: 1.5px solid #d1d9d6; border-radius: 12px;
             cursor: pointer; color: #666; font-weight: 600;
         }
-
-        /* --- MAIN CONTENT --- */
         .main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; }
         .header-top { display: flex; justify-content: flex-end; margin-bottom: 30px; }
         .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
         .admin-profile img { width: 35px; height: 35px; border-radius: 50%; }
-
         .page-header { margin-bottom: 25px; }
         .page-header h1 { font-size: 28px; font-weight: 700; color: #1a1c1b; }
         .page-header p { color: #9ca3af; font-size: 14px; }
-
-        /* --- TABS --- */
         .tabs-container { display: flex; gap: 10px; margin-bottom: 25px; }
         .tab-btn {
             padding: 8px 25px; border-radius: 5px; border: 1px solid #ddd;
             background: #fff; cursor: pointer; color: #666; font-weight: 500; transition: 0.3s;
         }
         .tab-btn.active { border-color: var(--primary-emerald); color: var(--primary-emerald); }
-
-        /* --- ARTIKEL GRID --- */
         .artikel-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 20px; margin-bottom: 30px;
         }
-
         .artikel-card {
             background: #fff; border-radius: 12px; overflow: hidden;
             border: 1px solid #eee; cursor: pointer; transition: transform 0.2s;
@@ -77,26 +64,19 @@
         .artikel-body { padding: 15px; }
         .artikel-body h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; line-height: 1.4; color: #1a1c1b; }
         .artikel-date { font-size: 11px; color: #9ca3af; display: flex; align-items: center; gap: 5px; }
-
-        /* --- DETAIL VIEW (Hidden by default) --- */
         #detail-view { display: none; background: #fff; border-radius: 20px; padding: 40px; margin-top: 20px; }
         .detail-header h2 { font-size: 24px; color: #1a1c1b; margin-bottom: 10px; }
         .detail-meta { color: #888; font-size: 14px; margin-bottom: 20px; }
         .detail-img { width: 300px; border-radius: 10px; margin-bottom: 25px; }
         .detail-content { line-height: 1.8; color: #444; font-size: 15px; margin-bottom: 30px; }
         .detail-footer { display: flex; justify-content: flex-end; gap: 15px; }
-
-        /* --- FOOTER UI --- */
         .pagination-area { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; font-size: 14px; }
         .btn-page { width: 35px; height: 35px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
         .btn-page.active { background: var(--primary-emerald); color: #fff; border-color: var(--primary-emerald); }
-
-        /* --- BUTTONS --- */
         .btn { padding: 10px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
         .btn-batal { background: #fff; color: var(--primary-emerald); border: 1px solid var(--primary-emerald); }
         .btn-action { background: var(--primary-emerald); color: #fff; }
         .btn-unpublish { background: #1da077; color: #fff; }
-
         .nav-link i {
         width: 20px;
         margin-right: 12px;
@@ -109,23 +89,22 @@
         }
 
         .modal-overlay {
-        display: none; /* Sembunyi secara default */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        background: rgba(0, 0, 0, 0.4);
         z-index: 9999;
         justify-content: center;
         align-items: center;
     }
 
-    /* Kotak Modal */
     .modal-content {
         background: white;
         padding: 40px 60px;
-        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        border-radius: 25px;
         text-align: center;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         max-width: 500px;
@@ -141,14 +120,12 @@
         line-height: 1.3;
     }
 
-    /* Container Tombol */
     .modal-buttons {
         display: flex;
         gap: 15px;
         justify-content: center;
     }
 
-    /* Gaya Tombol Umum */
     .modal-buttons button {
         padding: 10px 30px;
         border-radius: 8px;
@@ -159,7 +136,6 @@
         min-width: 120px;
     }
 
-    /* Tombol Kembali (Putih dengan Border Hijau) */
     .btn-kembali {
         background: white;
         color: #10b981;
@@ -170,9 +146,8 @@
         background: #f0fdf4;
     }
 
-    /* Tombol Ya (Hijau Solid) */
     .btn-ya {
-        background: #10b981; /* Warna Hijau Emerald */
+        background: #10b981;
         color: white;
         border: none;
     }
@@ -181,12 +156,11 @@
         background: #059669;
     }
 
-    /* Container untuk gambar di detail agar ukurannya terkontrol */
 .detail-img-box {
-    width: 300px;           /* Lebar tetap 300px sesuai keinginan Anda */
-    aspect-ratio: 16/9;     /* Menjaga rasio panjang x lebar tetap sama */
+    width: 300px;
+    aspect-ratio: 16/9;
     border-radius: 10px;
-    overflow: hidden;       /* Memotong bagian gambar yang keluar box */
+    overflow: hidden;
     margin-bottom: 25px;
     background: #f0f0f0;
 }
@@ -194,12 +168,53 @@
 .detail-img-box img {
     width: 100%;
     height: 100%;
-    object-fit: cover;      /* Ini kuncinya: gambar akan memenuhi box tanpa gepeng */
+    object-fit: cover;
 }
-    </style>
+
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary-emerald);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle { display: block; }
+
+    .sidebar {
+        left: -100%;
+        transition: 0.3s;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+        padding-top: 80px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
+</style>
 </head>
 <body>
-
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
 <div class="wrapper">
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
@@ -316,19 +331,14 @@
     const TOKEN = localStorage.getItem('access_token');
     let currentTab = 'diterima';
     let selectedArtikelId = null;
-
-    // Proteksi Halaman
     if (!TOKEN) {
         window.location.href = "login.html";
     }
-
-    // 1. Fungsi Load Data dari API
     async function loadArtikel() {
         const container = document.getElementById('artikel-container');
         container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #9ca3af;">Memuat data...</p>';
 
         try {
-            // Kita kirim parameter status ke Controller
             const response = await fetch(`${API_URL}?status=${currentTab}`, {
                 headers: {
                     'Authorization': `Bearer ${TOKEN}`,
@@ -346,7 +356,6 @@
             }
 
             articles.forEach(artikel => {
-                // Handle path gambar dari storage Laravel
                 const gambar = artikel.photo ? `${BASE_URL}/storage/${artikel.photo}` : '/images/artikel.jpg';
 
                 container.innerHTML += `
@@ -365,7 +374,6 @@
         }
     }
 
-    // 2. Fungsi Pindah Tab
     function switchTab(tab) {
         currentTab = tab;
         document.querySelectorAll('.tab-btn').forEach(btn => {
@@ -378,9 +386,8 @@
         loadArtikel();
     }
 
-    // 3. Menampilkan Detail Artikel
     function prepareDetail(artikel) {
-        selectedArtikelId = artikel.id; // Menggunakan primary key dari model
+        selectedArtikelId = artikel.id;
         document.getElementById('main-list-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
 
@@ -389,15 +396,12 @@
         document.getElementById('det-tanggal').innerText = artikel.timestamps.created_at;
         document.querySelector('.detail-content').innerHTML = artikel.full_content;
 
-        // Update gambar di detail
         const detailImg = document.querySelector('#detail-view .detail-img') || document.querySelector('#detail-view img');
         if(detailImg) {
             detailImg.src = artikel.photo ? `${BASE_URL}/storage/${artikel.photo}` : '/images/artikel.jpg';
         }
 
         const actionBtn = document.getElementById('btn-main-action');
-
-        // Logika tombol aksi berdasarkan tab aktif
         if(currentTab === 'dipublish') {
             actionBtn.innerText = 'Takedown (Arsip)';
             actionBtn.className = 'btn btn-unpublish';
@@ -409,13 +413,8 @@
         }
     }
 
-    // 4. Update Status (Approve/Takedown)
     async function updateStatus(action) {
     if (!selectedArtikelId) return;
-
-    // Tentukan endpoint berdasarkan aksi
-    // Jika approve -> panggil /approve (status jadi published)
-    // Jika takedown -> panggil /takedown (status jadi archived)
     let endpoint = "";
     let method = "";
 
@@ -423,7 +422,6 @@
         endpoint = `${API_URL}/${selectedArtikelId}/approve`;
         method = 'PATCH';
     } else {
-        // Karena di api.php takedown menggunakan PUT
         endpoint = `${BASE_URL}/api/articles/${selectedArtikelId}/takedown`;
         method = 'PUT';
     }
@@ -442,16 +440,10 @@
 
         if (res.ok) {
             alert(result.message || "Berhasil memperbarui status!");
-
-            // Sembunyikan detail
             hideDetail();
-
-            // LOGIKA PINDAH TAB OTOMATIS:
             if (action === 'approve') {
-                // Jika baru di-publish, pindahkan user ke tab 'dipublish'
                 switchTab('dipublish');
             } else {
-                // Jika di-takedown, tetap di tab saat ini tapi refresh data
                 loadArtikel();
             }
         } else {
@@ -489,8 +481,28 @@ function logout() {
         }
     }
 
-    // Init load
     loadArtikel();
+
+    function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle i');
+
+    sidebar.classList.toggle('active');
+
+    if (sidebar.classList.contains('active')) {
+        toggleBtn.classList.replace('fa-bars', 'fa-xmark');
+    } else {
+        toggleBtn.classList.replace('fa-xmark', 'fa-bars');
+    }
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    });
+});
 </script>
 
 </body>

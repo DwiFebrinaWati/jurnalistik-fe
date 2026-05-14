@@ -7,7 +7,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
-        /* --- RESET & BASE --- */
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         :root {
             --primary-emerald: #1da077;
@@ -15,11 +14,7 @@
             --sidebar-width: 260px;
         }
         body { background-color: var(--soft-bg); color: #333; }
-
-        /* --- LAYOUT --- */
         .wrapper { display: flex; min-height: 100vh; }
-
-        /* --- SIDEBAR --- */
         .sidebar {
             width: var(--sidebar-width); background: #fff; display: flex;
             flex-direction: column; border-right: 1px solid #edf2f0;
@@ -42,14 +37,10 @@
             border: 1.5px solid #d1d9d6; border-radius: 12px;
             cursor: pointer; color: #666; font-weight: 600;
         }
-
-        /* --- MAIN CONTENT --- */
         .main-content { margin-left: var(--sidebar-width); flex-grow: 1; padding: 40px; }
         .header-top { display: flex; justify-content: flex-end; margin-bottom: 30px; }
         .admin-profile { display: flex; align-items: center; gap: 10px; font-weight: 600; font-size: 14px; }
         .admin-profile img { width: 35px; height: 35px; border-radius: 50%; }
-
-        /* Judul & Tombol */
         .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
         .page-header h1 { font-size: 28px; font-weight: 700; color: #1a1c1b; }
         .page-header p { color: #9ca3af; font-size: 14px; }
@@ -59,8 +50,6 @@
             padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
             display: flex; align-items: center; gap: 8px;
         }
-
-        /* --- GRID HASIL KARYA --- */
         .karya-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -85,8 +74,6 @@
         .btn-action { flex: 1; padding: 6px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid transparent; }
         .btn-edit { background: #edf2ff; color: #4c6ef5; border-color: #dbe4ff; }
         .btn-hapus { background: #fff5f5; color: #fa5252; border-color: #ffe3e3; }
-
-        /* --- MODAL --- */
         .modal {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.4); display: none; align-items: center;
@@ -110,8 +97,6 @@
         .btn-m { min-width: 120px; padding: 12px; border-radius: 10px; font-weight: 600; cursor: pointer; border: none; }
         .btn-cancel { background: #fff; color: var(--primary-emerald); border: 1.5px solid var(--primary-emerald); }
         .btn-save { background: var(--primary-emerald); color: #fff; }
-
-        /* PAGINATION */
         .pagination-area { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; font-size: 14px; }
         .page-nav { display: flex; gap: 8px; }
         .btn-page { width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
@@ -129,23 +114,22 @@
         }
 
         .modal-overlay {
-        display: none; /* Sembunyi secara default */
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        background: rgba(0, 0, 0, 0.4);
         z-index: 9999;
         justify-content: center;
         align-items: center;
     }
 
-    /* Kotak Modal */
     .modal-content {
         background: white;
         padding: 40px 60px;
-        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        border-radius: 25px;
         text-align: center;
         box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         max-width: 500px;
@@ -161,14 +145,12 @@
         line-height: 1.3;
     }
 
-    /* Container Tombol */
     .modal-buttons {
         display: flex;
         gap: 15px;
         justify-content: center;
     }
 
-    /* Gaya Tombol Umum */
     .modal-buttons button {
         padding: 10px 30px;
         border-radius: 8px;
@@ -179,7 +161,6 @@
         min-width: 120px;
     }
 
-    /* Tombol Kembali (Putih dengan Border Hijau) */
     .btn-kembali {
         background: white;
         color: #10b981;
@@ -190,9 +171,8 @@
         background: #f0fdf4;
     }
 
-    /* Tombol Ya (Hijau Solid) */
     .btn-ya {
-        background: #10b981; /* Warna Hijau Emerald */
+        background: #10b981;
         color: white;
         border: none;
     }
@@ -200,10 +180,51 @@
     .btn-ya:hover {
         background: #059669;
     }
+
+.menu-toggle {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 1001;
+    background: var(--primary-emerald);
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+@media (max-width: 768px) {
+    .menu-toggle { display: block; }
+
+    .sidebar {
+        left: -100%;
+        transition: 0.3s;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .main-content {
+        margin-left: 0;
+        padding: 20px;
+        padding-top: 80px;
+    }
+
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+    }
+}
     </style>
 </head>
 <body>
-
+<button class="menu-toggle" onclick="toggleSidebar()">
+    <i class="fa-solid fa-bars"></i>
+</button>
 <div class="wrapper">
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
@@ -357,14 +378,12 @@
 </div>
 
 <script>
-    // 1. SESUAIKAN URL API LOKAL KAMU
     const BASE_URL = 'http://127.0.0.1:8000'; // Ganti sesuai port artisan serve kamu
     const API_URL = `${BASE_URL}/api/works`;
     const TOKEN = localStorage.getItem('access_token');
 
     if (!TOKEN) { window.location.href = "login.html"; }
 
-    // Memuat Data
     async function loadKarya() {
         const grid = document.querySelector('.karya-grid');
         grid.innerHTML = '<p style="text-align:center; width:100%;">Memuat data...</p>';
@@ -374,9 +393,6 @@
                 headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' }
             });
             const result = await response.json();
-
-            // Controller kamu return langsung array: return response()->json(Work::latest()->get());
-            // Jadi variabel 'result' kemungkinan adalah array langsung
             const data = Array.isArray(result) ? result : result.data;
 
             grid.innerHTML = '';
@@ -386,7 +402,6 @@
             }
 
             data.forEach(item => {
-                // Menangani URL Gambar dari Storage Laravel
                 const coverPath = item.cover_image ? `${BASE_URL}/storage/${item.cover_image}` : '/images/default-karya.jpg';
 
                 grid.innerHTML += `
@@ -418,10 +433,8 @@
         }
     }
 
-    // Tambah Data
     async function handleTambah() {
         const formData = new FormData();
-        // Mapping: Nama di Form -> Nama yang diminta Controller (Request Validate)
         formData.append('title', document.querySelector('#modalTambah input[placeholder="Masukkan judul"]').value);
         formData.append('url', document.querySelector('#modalTambah input[placeholder="Masukkan link drive"]').value);
         formData.append('cover_by', document.querySelector('#modalTambah input[placeholder="Nama pembuat cover"]').value);
@@ -452,10 +465,9 @@
         } catch (error) { alert("Koneksi gagal!"); }
     }
 
-    // Edit Data
     let selectedId = null;
     function prepareEdit(item) {
-        selectedId = item.work_id; // Menggunakan work_id sesuai Model
+        selectedId = item.work_id;
         document.getElementById('edit-judul').value = item.title;
         document.getElementById('edit-link').value = item.url;
         document.getElementById('edit-coverby').value = item.cover_by;
@@ -480,7 +492,7 @@
 
         try {
             const res = await fetch(`${API_URL}/${selectedId}`, {
-                method: 'POST', // Gunakan POST + _method PUT untuk form-data
+                method: 'POST',
                 headers: { 'Authorization': `Bearer ${TOKEN}`, 'Accept': 'application/json' },
                 body: formData
             });
@@ -492,7 +504,6 @@
         } catch (error) { alert("Gagal update data"); }
     }
 
-    // Hapus Data
     let deleteId = null;
     function prepareDelete(id) {
         deleteId = id;
@@ -512,7 +523,6 @@
         } catch (error) { alert("Gagal menghapus"); }
     }
 
-    // Helper UI
     function showModal(id) { document.getElementById(id).style.display = 'flex'; }
     function hideModal(id) { document.getElementById(id).style.display = 'none'; }
     function previewImg(input, targetId) {
@@ -526,7 +536,6 @@
         }
     }
 
-    // Init
     function logout() {
         document.getElementById('modalLogout').style.display = 'flex';
     }
@@ -546,11 +555,32 @@
             closeLogoutModal();
         }
     }
-    
+
     document.querySelector('#modalTambah .btn-save').onclick = handleTambah;
     document.querySelector('#modalEdit .btn-save').onclick = handleEdit;
     document.querySelector('#modalHapus .btn-save').onclick = confirmDelete;
     loadKarya();
+
+    function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const toggleBtn = document.querySelector('.menu-toggle i');
+
+    sidebar.classList.toggle('active');
+
+    if (sidebar.classList.contains('active')) {
+        toggleBtn.classList.replace('fa-bars', 'fa-xmark');
+    } else {
+        toggleBtn.classList.replace('fa-xmark', 'fa-bars');
+    }
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+        if (window.innerWidth <= 768) {
+            toggleSidebar();
+        }
+    });
+});
 </script>
 
 </body>
