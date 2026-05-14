@@ -302,7 +302,7 @@
     const statusMap = {
         'disimpan': 'draft',
         'dikirim': 'submitted',
-        'diterima': 'approved',
+        'diterima': 'accepted',
         'ditolak': 'rejected',
         'dipublish': 'published'
     };

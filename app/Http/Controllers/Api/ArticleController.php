@@ -18,15 +18,23 @@ class ArticleController extends Controller
         $query = Article::with('author');
 
         if ($request->has('status')) {
-            // Biarkan controller menerima status apa adanya dari JS (draft/submitted/published)
-            $query->where('status', $request->status);
-        } else {
-            $query->where('status', 'published');
-        }
+        $status = $request->status;
 
-        $articles = $query->latest()->get();
-        return ArticleResource::collection($articles);
+        // Pemetaan jika teks dari JS berbeda dengan di Database
+        if ($status === 'diterima') {
+            $query->where('status', 'accepted');
+        } elseif ($status === 'dipublish') {
+            $query->where('status', 'published');
+        } else {
+            $query->where('status', $status);
+        }
+    } else {
+        $query->where('status', 'published');
     }
+
+    $articles = $query->latest()->get();
+    return ArticleResource::collection($articles);
+}
 
     public function updateStatus(Request $request, $id)
 {

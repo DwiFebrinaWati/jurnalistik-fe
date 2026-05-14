@@ -86,6 +86,22 @@
         .detail-content { line-height: 1.8; color: #444; font-size: 15px; margin-bottom: 30px; }
         .detail-footer { display: flex; justify-content: flex-end; gap: 15px; }
 
+        /* Container untuk gambar di detail agar ukurannya terkontrol */
+.detail-img-box {
+    width: 300px;           /* Lebar tetap 300px sesuai keinginan Anda */
+    aspect-ratio: 16/9;     /* Menjaga rasio panjang x lebar tetap sama */
+    border-radius: 10px;
+    overflow: hidden;       /* Memotong bagian gambar yang keluar box */
+    margin-bottom: 25px;
+    background: #f0f0f0;
+}
+
+.detail-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* Ini kuncinya: gambar akan memenuhi box tanpa gepeng */
+}
+
         /* --- FOOTER UI --- */
         .pagination-area { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; font-size: 14px; }
         .btn-page { width: 35px; height: 35px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
@@ -262,7 +278,9 @@
                 <h2 id="det-judul">Daftar Nama Siswa yang Berhasil Lolos SNBP 2026</h2>
                 <p class="detail-meta"><span id="det-penulis">Ilya Saruni</span> | <span id="det-tanggal">18 Maret 2026</span></p>
             </div>
+            <div class = "detail-img-box">
             <img src="{{ asset('images/artikel.jpg') }}" id="img-artikel-1" alt="Artikel">
+            </div>
             <div class="detail-content">
                 <p>Kabar membanggakan datang dari SMAN 1 Contoh. Sejumlah siswa berhasil lolos dalam Seleksi Nasional Berdasarkan Prestasi (SNBP) tahun 2026...</p>
                 <br>
@@ -292,8 +310,9 @@
     </div>
 </div>
 
+
 <script>
-    const BASE_URL = 'http://127.0.0.1:8000/api';
+    const BASE_URL = 'http://127.0.0.1:8000';
     const API_URL = `${BASE_URL}/api/articles`;
     const TOKEN = localStorage.getItem('access_token');
     let currentTab = 'diterima';
@@ -353,7 +372,9 @@
         document.querySelectorAll('.tab-btn').forEach(btn => {
             btn.classList.remove('active');
             // Menyamakan teks tombol dengan variabel tab
-            if(btn.innerText.toLowerCase() === tab) btn.classList.add('active');
+            if(btn.innerText.toLowerCase() === tab.toLowerCase()) {
+            btn.classList.add('active');
+        }
         });
         loadArtikel();
     }
@@ -365,9 +386,10 @@
         document.getElementById('detail-view').style.display = 'block';
 
         document.getElementById('det-judul').innerText = artikel.title;
-        document.getElementById('det-penulis').innerText = artikel.author ? artikel.author.name : 'Anonim';
-        document.getElementById('det-tanggal').innerText = artikel.created_at;
-        document.querySelector('.detail-content').innerHTML = artikel.content;
+        const namaPenulis = artikel.author ? (artikel.author.name || artikel.author) : 'Anonim';
+        document.getElementById('det-penulis').innerText = namaPenulis;
+        document.getElementById('det-tanggal').innerText = artikel.timestamps.created_at;
+        document.querySelector('.detail-content').innerHTML = artikel.full_content;
 
         // Update gambar di detail
         const detailImg = document.querySelector('#detail-view .detail-img') || document.querySelector('#detail-view img');
@@ -390,36 +412,38 @@
     }
 
     // 4. Update Status (Approve/Takedown)
-    async function updateStatus(action) {
-        if (!selectedArtikelId) return;
+async function updateStatus(action) {
+    if (!selectedArtikelId) return;
 
-        // Sesuaikan endpoint dengan api.php (takedown pakai PUT, approve pakai PATCH)
-        const method = action === 'approve' ? 'PATCH' : 'PUT';
-        const endpoint = `${API_URL}/${selectedArtikelId}/${action}`;
+    let targetStatus = (action === 'approve') ? 'published' : 'archived';
 
-        try {
-            const res = await fetch(endpoint, {
-                method: method,
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                }
-            });
+    // Pilih method (beberapa API butuh POST/PATCH untuk update)
+    const method = 'PATCH';
+    const endpoint = `${API_URL}/${selectedArtikelId}/status`; // Sesuaikan route di api.php
 
-            if (res.ok) {
-                alert(`Aksi ${action} berhasil!`);
-                hideDetail();
-                loadArtikel();
-            } else {
-                const errData = await res.json();
-                alert("Gagal: " + (errData.message || "Terjadi kesalahan"));
-            }
-        } catch (error) {
-            console.error("Error update status:", error);
-            alert("Koneksi gagal.");
+    try {
+        const res = await fetch(endpoint, {
+            method: method,
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                status: targetStatus
+                // Jika rejected, tambahkan message: "..."
+            })
+        });
+
+        if (res.ok) {
+            alert(`Berhasil update ke ${targetStatus}`);
+            hideDetail();
+            loadArtikel();
         }
+    } catch (error) {
+        alert("Terjadi kesalahan koneksi.");
     }
+}
 
     function hideDetail() {
         document.getElementById('main-list-view').style.display = 'block';
