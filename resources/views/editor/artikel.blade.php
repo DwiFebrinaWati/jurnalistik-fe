@@ -288,15 +288,17 @@
             const resData = await response.json();
             const art = resData.data || resData;
 
+            const isReadOnly = activeStatus !== 'submitted';
+
             // KONSEP: BISA EDIT (readOnly = false)
             const judulInput = document.getElementById('edit-judul');
             const isiInput = document.getElementById('edit-isi');
 
             judulInput.value = art.title || '';
-            judulInput.readOnly = false;
+            judulInput.readOnly = isReadOnly;
 
             isiInput.value = art.full_content || art.content || '';
-            isiInput.readOnly = false;
+            isiInput.readOnly = isReadOnly;
 
             // Preview Gambar
             const fileGambar = art.photo || art.thumbnail || art.image;
@@ -316,15 +318,20 @@
 
             // Update Label Tombol Aksi Utama
             const btnPrimary = document.getElementById('btn-action-primary');
+            const btnReject = document.getElementById('btn-tolak');
+
             if (btnPrimary) {
-                if (activeStatus === 'submitted') {
-                    btnPrimary.innerText = "Terima";
-                } else if (activeStatus === 'accepted') {
-                    btnPrimary.innerText = "Publish & Simpan";
-                } else {
-                    btnPrimary.innerText = "Simpan Perubahan";
-                }
+            if (activeStatus === 'submitted') {
+                btnPrimary.innerText = "Terima";
+                btnPrimary.style.display = 'inline-block';
+            } else if (activeStatus === 'accepted') {
+                btnPrimary.innerText = "Publish & Simpan";
+                btnPrimary.style.display = 'none';
+                btnReject.style.display = 'none';
+            } else {
+                btnPrimary.style.display = 'none';
             }
+        }
 
             document.getElementById('dashboard-view').style.display = 'none';
             document.getElementById('detail-view').style.display = 'block';
