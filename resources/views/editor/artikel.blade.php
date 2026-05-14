@@ -373,32 +373,36 @@
         }
     }
 
-    async function handleReject() {
-        const note = document.querySelector('#modalRevisi textarea').value;
-        if (!note) return alert("Alasan penolakan harus diisi!");
+async function handleReject() {
+    const note = document.getElementById('rejection-note').value; // Ambil dari textarea modal
+    if (!note) return alert("Alasan penolakan harus diisi!");
 
-        try {
-            const response = await fetch(`${API_URL}/${currentArticleId}/status`, {
-                method: 'PATCH',
-                headers: {
-                    'Authorization': `Bearer ${TOKEN}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    status: 'rejected',
-                    revision_note: note
-                })
-            });
+    try {
+        const response = await fetch(`${API_URL}/${currentArticleId}/status`, {
+            method: 'PATCH',
+            headers: {
+                'Authorization': `Bearer ${TOKEN}`,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json' // Tambahkan ini agar Laravel kirim error JSON jika validasi gagal
+            },
+            body: JSON.stringify({
+                status: 'rejected',
+                message: note // HARUS "message" agar dibaca oleh $request->message di Controller
+            })
+        });
 
-            if (response.ok) {
-                alert("Artikel ditolak!");
-                toggleModal(false);
-                closeDetail();
-            }
-        } catch (error) {
-            alert("Gagal menolak artikel");
+        if (response.ok) {
+            alert("Artikel ditolak dan alasan revisi disimpan!");
+            toggleModal(false);
+            closeDetail();
+        } else {
+            const err = await response.json();
+            alert("Gagal: " + (err.message || "Terjadi kesalahan"));
         }
+    } catch (error) {
+        alert("Gagal menghubungi server");
     }
+}
 
     function closeDetail() {
         document.getElementById('dashboard-view').style.display = 'block';
