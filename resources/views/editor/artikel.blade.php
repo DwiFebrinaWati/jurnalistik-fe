@@ -109,6 +109,79 @@
         .btn-logout i {
         margin-right: 8px;
         }
+
+        .modal-overlay {
+        display: none; /* Sembunyi secara default */
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4); /* Efek gelap transparan */
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+    }
+
+    /* Kotak Modal */
+    .modal-content {
+        background: white;
+        padding: 40px 60px;
+        border-radius: 25px; /* Sudut melengkung besar sesuai gambar */
+        text-align: center;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        max-width: 500px;
+        width: 90%;
+    }
+
+    .modal-content h2 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 700;
+        color: #0d1b2a;
+        margin-bottom: 30px;
+        font-size: 24px;
+        line-height: 1.3;
+    }
+
+    /* Container Tombol */
+    .modal-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+    }
+
+    /* Gaya Tombol Umum */
+    .modal-buttons button {
+        padding: 10px 30px;
+        border-radius: 8px;
+        font-weight: 600;
+        cursor: pointer;
+        font-size: 16px;
+        transition: 0.3s;
+        min-width: 120px;
+    }
+
+    /* Tombol Kembali (Putih dengan Border Hijau) */
+    .btn-kembali {
+        background: white;
+        color: #10b981;
+        border: 2px solid #10b981;
+    }
+
+    .btn-kembali:hover {
+        background: #f0fdf4;
+    }
+
+    /* Tombol Ya (Hijau Solid) */
+    .btn-ya {
+        background: #10b981; /* Warna Hijau Emerald */
+        color: white;
+        border: none;
+    }
+
+    .btn-ya:hover {
+        background: #059669;
+    }
     </style>
 </head>
 <body>
@@ -134,7 +207,7 @@
             </a>
         </nav>
         <div class="logout-area">
-            <button class="btn-logout">
+            <button class="btn-logout" onclick="logout()">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
         </div>
@@ -197,6 +270,16 @@
             <button class="btn-tolak" style="background:#fff;" onclick="toggleModal(false)">Batal</button>
             <!-- PERBAIKAN: Tambahkan onclick="handleReject()" -->
             <button class="btn-terima" onclick="handleReject()">Simpan</button>
+        </div>
+    </div>
+</div>
+
+<div id="modalLogout" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Apakah Anda yakin ingin keluar akun?</h2>
+        <div class="modal-buttons">
+            <button class="btn-kembali" onclick="closeLogoutModal()">Kembali</button>
+            <button class="btn-ya" onclick="executeLogout()">Ya</button>
         </div>
     </div>
 </div>
@@ -428,6 +511,26 @@ async function handleReject() {
     const confirmRejectBtn = document.querySelector('#modalRevisi .btn-terima');
     if (confirmRejectBtn) {
         confirmRejectBtn.onclick = handleReject;
+    }
+
+    function logout() {
+        document.getElementById('modalLogout').style.display = 'flex';
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('modalLogout').style.display = 'none';
+    }
+
+    function executeLogout() {
+        localStorage.clear();
+        window.location.href = "/login";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById('modalLogout');
+        if (event.target == modal) {
+            closeLogoutModal();
+        }
     }
 </script>
 
