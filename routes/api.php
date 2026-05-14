@@ -42,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/articles/{id}', [ArticleController::class, 'destroy']);
     Route::patch('/articles/{id}/status', [ArticleController::class, 'updateStatus']);
     Route::post('/comments', [CommentController::class, 'store']);
+    Route::patch('/articles/{id}/approve', [ArticleController::class, 'approve']);
 
     Route::middleware('is_admin')->group(function () {
         Route::patch('/articles/{id}/approve', [ArticleController::class, 'approve']);

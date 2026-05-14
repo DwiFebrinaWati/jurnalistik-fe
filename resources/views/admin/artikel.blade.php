@@ -86,22 +86,6 @@
         .detail-content { line-height: 1.8; color: #444; font-size: 15px; margin-bottom: 30px; }
         .detail-footer { display: flex; justify-content: flex-end; gap: 15px; }
 
-        /* Container untuk gambar di detail agar ukurannya terkontrol */
-.detail-img-box {
-    width: 300px;           /* Lebar tetap 300px sesuai keinginan Anda */
-    aspect-ratio: 16/9;     /* Menjaga rasio panjang x lebar tetap sama */
-    border-radius: 10px;
-    overflow: hidden;       /* Memotong bagian gambar yang keluar box */
-    margin-bottom: 25px;
-    background: #f0f0f0;
-}
-
-.detail-img-box img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;      /* Ini kuncinya: gambar akan memenuhi box tanpa gepeng */
-}
-
         /* --- FOOTER UI --- */
         .pagination-area { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; font-size: 14px; }
         .btn-page { width: 35px; height: 35px; border-radius: 8px; border: 1px solid #ddd; background: #fff; cursor: pointer; }
@@ -196,6 +180,22 @@
     .btn-ya:hover {
         background: #059669;
     }
+
+    /* Container untuk gambar di detail agar ukurannya terkontrol */
+.detail-img-box {
+    width: 300px;           /* Lebar tetap 300px sesuai keinginan Anda */
+    aspect-ratio: 16/9;     /* Menjaga rasio panjang x lebar tetap sama */
+    border-radius: 10px;
+    overflow: hidden;       /* Memotong bagian gambar yang keluar box */
+    margin-bottom: 25px;
+    background: #f0f0f0;
+}
+
+.detail-img-box img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;      /* Ini kuncinya: gambar akan memenuhi box tanpa gepeng */
+}
     </style>
 </head>
 <body>
@@ -278,7 +278,7 @@
                 <h2 id="det-judul">Daftar Nama Siswa yang Berhasil Lolos SNBP 2026</h2>
                 <p class="detail-meta"><span id="det-penulis">Ilya Saruni</span> | <span id="det-tanggal">18 Maret 2026</span></p>
             </div>
-            <div class = "detail-img-box">
+            <div class="detail-img-box">
             <img src="{{ asset('images/artikel.jpg') }}" id="img-artikel-1" alt="Artikel">
             </div>
             <div class="detail-content">
@@ -309,7 +309,6 @@
         </div>
     </div>
 </div>
-
 
 <script>
     const BASE_URL = 'http://127.0.0.1:8000';
@@ -386,8 +385,7 @@
         document.getElementById('detail-view').style.display = 'block';
 
         document.getElementById('det-judul').innerText = artikel.title;
-        const namaPenulis = artikel.author ? (artikel.author.name || artikel.author) : 'Anonim';
-        document.getElementById('det-penulis').innerText = namaPenulis;
+        document.getElementById('det-penulis').innerText = artikel.author ? artikel.author.name : 'Anonim';
         document.getElementById('det-tanggal').innerText = artikel.timestamps.created_at;
         document.querySelector('.detail-content').innerHTML = artikel.full_content;
 
@@ -412,7 +410,7 @@
     }
 
     // 4. Update Status (Approve/Takedown)
-async function updateStatus(action) {
+    async function updateStatus(action) {
     if (!selectedArtikelId) return;
 
     let targetStatus = (action === 'approve') ? 'published' : 'archived';
