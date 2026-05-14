@@ -380,7 +380,7 @@
 
     // 3. Menampilkan Detail Artikel
     function prepareDetail(artikel) {
-        selectedArtikelId = artikel.article_id; // Menggunakan primary key dari model
+        selectedArtikelId = artikel.id; // Menggunakan primary key dari model
         document.getElementById('main-list-view').style.display = 'none';
         document.getElementById('detail-view').style.display = 'block';
 
@@ -413,11 +413,20 @@
     async function updateStatus(action) {
     if (!selectedArtikelId) return;
 
-    let targetStatus = (action === 'approve') ? 'published' : 'archived';
+    // Tentukan endpoint berdasarkan aksi
+    // Jika approve -> panggil /approve (status jadi published)
+    // Jika takedown -> panggil /takedown (status jadi archived)
+    let endpoint = "";
+    let method = "";
 
-    // Pilih method (beberapa API butuh POST/PATCH untuk update)
-    const method = 'PATCH';
-    const endpoint = `${API_URL}/${selectedArtikelId}/status`; // Sesuaikan route di api.php
+    if (action === 'approve') {
+        endpoint = `${API_URL}/${selectedArtikelId}/approve`;
+        method = 'PATCH';
+    } else {
+        // Karena di api.php takedown menggunakan PUT
+        endpoint = `${BASE_URL}/api/articles/${selectedArtikelId}/takedown`;
+        method = 'PUT';
+    }
 
     try {
         const res = await fetch(endpoint, {
@@ -426,20 +435,31 @@
                 'Authorization': `Bearer ${TOKEN}`,
                 'Accept': 'application/json',
                 'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                status: targetStatus
-                // Jika rejected, tambahkan message: "..."
-            })
+            }
         });
 
+        const result = await res.json();
+
         if (res.ok) {
-            alert(`Berhasil update ke ${targetStatus}`);
+            alert(result.message || "Berhasil memperbarui status!");
+
+            // Sembunyikan detail
             hideDetail();
-            loadArtikel();
+
+            // LOGIKA PINDAH TAB OTOMATIS:
+            if (action === 'approve') {
+                // Jika baru di-publish, pindahkan user ke tab 'dipublish'
+                switchTab('dipublish');
+            } else {
+                // Jika di-takedown, tetap di tab saat ini tapi refresh data
+                loadArtikel();
+            }
+        } else {
+            alert("Gagal: " + (result.message || "Terjadi kesalahan"));
         }
     } catch (error) {
-        alert("Terjadi kesalahan koneksi.");
+        console.error("Error update:", error);
+        alert("Terjadi kesalahan koneksi ke server.");
     }
 }
 
