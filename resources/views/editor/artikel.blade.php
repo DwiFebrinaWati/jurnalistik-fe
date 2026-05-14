@@ -277,76 +277,69 @@
     }
 
     async function openDetail(id) {
-    currentArticleId = id;
-    try {
-        const response = await fetch(`${API_URL}/${id}`, {
-            headers: { 'Authorization': `Bearer ${TOKEN}` }
-        });
+        currentArticleId = id;
+        try {
+            const response = await fetch(`${API_URL}/${id}`, {
+                headers: { 'Authorization': `Bearer ${TOKEN}` }
+            });
 
-        if (!response.ok) throw new Error("Gagal mengambil data");
+            if (!response.ok) throw new Error("Gagal mengambil data");
 
-        const resData = await response.json();
-        const art = resData.data || resData;
-        const status = art.status; // Ambil status dari data API
+            const resData = await response.json();
+            const art = resData.data || resData;
 
-        const judulInput = document.getElementById('edit-judul');
-        const isiInput = document.getElementById('edit-isi');
-        const actionContainer = document.getElementById('detail-actions-container');
-        const btnTolak = document.getElementById('btn-tolak');
-        const btnPrimary = document.getElementById('btn-action-primary');
+            // KONSEP: BISA EDIT (readOnly = false)
+            const judulInput = document.getElementById('edit-judul');
+            const isiInput = document.getElementById('edit-isi');
 
-        // ISI DATA
-        judulInput.value = art.title || '';
-        isiInput.value = art.full_content || art.content || '';
-
-        // LOGIKA LOCK EDIT & TOMBOL
-        // Hanya status 'submitted' yang bisa diedit dan punya tombol terima/tolak
-        if (status === 'submitted') {
+            judulInput.value = art.title || '';
             judulInput.readOnly = false;
+
+            isiInput.value = art.full_content || art.content || '';
             isiInput.readOnly = false;
-            judulInput.style.border = "1px solid #ddd"; // Beri penanda visual bisa diedit
-            actionContainer.style.display = 'flex';
-            btnTolak.style.display = 'block';
-            btnPrimary.innerText = "Terima";
-        } else {
-            judulInput.readOnly = true;
-            isiInput.readOnly = true;
-            judulInput.style.border = "none";
 
-            // Jika sudah accepted, editor mungkin masih butuh tombol "Publish"
-            // Tapi jika permintaanmu "sama sekali tidak ada tombol lagi":
-            if (status === 'accepted') {
-                actionContainer.style.display = 'flex';
-                btnTolak.style.display = 'none'; // Sembunyikan tombol tolak
-                btnPrimary.innerText = "Publish Artikel";
-            } else {
-                // Untuk rejected dan published, sembunyikan semua aksi
-                actionContainer.style.display = 'none';
+            // Preview Gambar
+            const fileGambar = art.photo || art.thumbnail || art.image;
+            let gambarUrl = 'https://via.placeholder.com/400x225?text=No+Image';
+            if (fileGambar) {
+                gambarUrl = fileGambar.startsWith('http') ? fileGambar : `${ROOT_URL}/storage/${fileGambar}`;
             }
+            document.getElementById('edit-img').src = gambarUrl;
+
+            // Meta Info
+            const authorName = art.author ? art.author.name : 'Anonim';
+            const tanggal = art.timestamps?.created_at || '-';
+            document.getElementById('edit-meta').innerText = `${authorName} | ${tanggal}`;
+
+            // Sembunyikan Tabs saat fokus edit detail
+            document.getElementById('tabs-container').innerHTML = '';
+
+            // Update Label Tombol Aksi Utama
+            const btnPrimary = document.getElementById('btn-action-primary');
+            if (btnPrimary) {
+                if (activeStatus === 'submitted') {
+                    btnPrimary.innerText = "Terima";
+                } else if (activeStatus === 'accepted') {
+                    btnPrimary.innerText = "Publish & Simpan";
+                } else {
+                    btnPrimary.innerText = "Simpan Perubahan";
+                }
+            }
+
+            document.getElementById('dashboard-view').style.display = 'none';
+            document.getElementById('detail-view').style.display = 'block';
+
+        } catch (error) {
+            alert("Gagal mengambil detail artikel");
         }
-
-        // Gambar & Meta
-        const fileGambar = art.photo || art.thumbnail || art.image;
-        document.getElementById('edit-img').src = fileGambar ? (fileGambar.startsWith('http') ? fileGambar : `${ROOT_URL}/storage/${fileGambar}`) : 'https://via.placeholder.com/400x225?text=No+Image';
-        document.getElementById('edit-meta').innerText = `${art.author?.name || 'Anonim'} | ${art.timestamps?.created_at || '-'}`;
-
-        document.getElementById('dashboard-view').style.display = 'none';
-        document.getElementById('detail-view').style.display = 'block';
-
-    } catch (error) {
-        alert("Gagal mengambil detail artikel");
     }
-}
 
     async function handleMainAction() {
-        // Alur status: submitted -> accepted -> published
         let nextStatus = activeStatus;
         if (activeStatus === 'submitted') nextStatus = 'accepted';
         else if (activeStatus === 'accepted') nextStatus = 'published';
 
-        if (activeStatus === 'rejected') nextStatus = 'accepted';
-
-        if (!confirm(`Ubah status artikel ini menjadi ${nextStatus}?`)) return;
+        if (!confirm(`Simpan perubahan dan ubah status ke ${nextStatus}?`)) return;
 
         const updatedData = {
             status: nextStatus,
@@ -374,36 +367,31 @@
     }
 
     async function handleReject() {
-    const note = document.getElementById('rejection-note').value;
-    if (!note) return alert("Alasan penolakan harus diisi!");
+        const note = document.querySelector('#modalRevisi textarea').value;
+        if (!note) return alert("Alasan penolakan harus diisi!");
 
-    try {
-        const response = await fetch(`${API_URL}/${currentArticleId}/status`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${TOKEN}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                status: 'rejected',
-                message: note // Sesuai dengan $request->message di Controller Laravel
-            })
-        });
+        try {
+            const response = await fetch(`${API_URL}/${currentArticleId}/status`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${TOKEN}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    status: 'rejected',
+                    revision_note: note
+                })
+            });
 
-        if (response.ok) {
-            alert("Artikel berhasil ditolak.");
-            document.getElementById('rejection-note').value = ''; // Reset form
-            toggleModal(false);
-            closeDetail();
-        } else {
-            const err = await response.json();
-            alert("Gagal: " + (err.message || "Terjadi kesalahan"));
+            if (response.ok) {
+                alert("Artikel ditolak!");
+                toggleModal(false);
+                closeDetail();
+            }
+        } catch (error) {
+            alert("Gagal menolak artikel");
         }
-    } catch (error) {
-        console.error(error);
-        alert("Terjadi kesalahan koneksi");
     }
-}
 
     function closeDetail() {
         document.getElementById('dashboard-view').style.display = 'block';
@@ -416,14 +404,13 @@
         document.getElementById('modalRevisi').style.display = show ? 'flex' : 'none';
     }
 
-    // Fungsi pembantu untuk memicu modal dari HTML
     function openRejectModal() {
         toggleModal(true);
     }
 
     document.addEventListener('DOMContentLoaded', () => {
         renderTabs('dashboard');
-        loadArticles('submitted');
+        loadArticles('submitted'); // Otomatis muat status submitted saat pertama buka
     });
 
     // Menghubungkan tombol konfirmasi di dalam modal
