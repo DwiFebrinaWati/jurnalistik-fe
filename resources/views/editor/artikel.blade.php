@@ -426,7 +426,7 @@
             if (activeStatus === 'submitted') {
                 btnPrimary.innerText = "Terima";
                 btnPrimary.style.display = 'inline-block';
-            } else if (activeStatus === 'accepted') {
+            } else if (activeStatus === 'accepted', 'rejected', 'published') {
                 btnPrimary.innerText = "Publish & Simpan";
                 btnPrimary.style.display = 'none';
                 btnReject.style.display = 'none';
