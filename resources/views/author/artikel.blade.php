@@ -170,20 +170,40 @@
         background: #059669;
     }
 
-.menu-toggle {
-    display: none;
-    position: fixed;
-    top: 20px;
-    left: 20px;
-    z-index: 1001;
-    background: var(--primary-emerald);
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 20px;
-}
+    .menu-toggle {
+        display: none;
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 1001;
+        background: var(--primary-emerald);
+        color: white;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 20px;
+    }
+
+    .nav-link .lock-icon {
+                        margin-left: auto;
+                        font-size: 12px;
+                        opacity: 0.6;
+                    }
+
+            #locked-view {
+                flex-grow: 1;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                border-radius: 20px;
+                min-height: 70vh;
+                margin-top: 10px;
+            }
+            .locked-icon-big {
+                font-size: 120px;
+                color: #4b5563;
+            }
 
 @media (max-width: 768px) {
     .menu-toggle { display: block; }
@@ -218,11 +238,11 @@
     <aside class="sidebar">
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
         <nav class="nav-menu">
-            <a href="#" class="nav-link"><i class="fa-solid fa-user"></i> Pengguna</a>
-            <a href="#" class="nav-link"><i class="fa-solid fa-users"></i> Anggota</a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-user"></i> Pengguna <i class="fa-solid fa-lock lock-icon"></i></a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-users"></i> Anggota <i class="fa-solid fa-lock lock-icon"></i></a>
             <a href="#" class="nav-link active"><i class="fa-solid fa-newspaper"></i> Artikel</a>
-            <a href="#" class="nav-link"><i class="fa-solid fa-clipboard-list"></i> Materi</a>
-            <a href="#" class="nav-link"><i class="fa-solid fa-image"></i> Hasil karya</a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-clipboard-list"></i> Materi <i class="fa-solid fa-lock lock-icon"></i></a>
+            <a href="#" class="nav-link"><i class="fa-solid fa-image"></i> Hasil karya <i class="fa-solid fa-lock lock-icon"></i></a>
         </nav>
         <div class="logout-area">
             <button class="btn-logout" onclick="logout()">
@@ -282,6 +302,14 @@
 
             <textarea class="input-isi" id="edit-isi" placeholder="Tuliskan isi artikel di sini..."></textarea>
         </div>
+
+            <div id="locked-view">
+            <div style="text-align: center;">
+                <i class="fa-solid fa-lock locked-icon-big"></i>
+                <h2 style="margin-top: 20px; color: #4b5563;">Akses Terbatas</h2>
+                <p style="color: #6b7280;">Hanya Administrator yang dapat mengakses halaman ini.</p>
+            </div>
+    </div>
     </main>
 </div>
 
@@ -586,6 +614,40 @@ document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
             toggleSidebar();
+        }
+    });
+});
+
+function switchView(viewId) {
+    const views = ['list-view', 'editor-view', 'locked-view'];
+
+    views.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (id === viewId) {
+                element.style.display = (id === 'locked-view' ? 'flex' : 'block');
+            } else {
+                element.style.display = 'none';
+            }
+        }
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const text = link.innerText.trim().toLowerCase();
+
+        if (text.includes('artikel')) {
+            switchView('list-view');
+            link.classList.add('active');
+            loadArticles(currentStatusTab);
+        } else {
+            switchView('locked-view');
+            link.classList.add('active');
         }
     });
 });

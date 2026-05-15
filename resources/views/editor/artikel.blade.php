@@ -90,6 +90,26 @@
         .modal-box { background: #fff; padding: 40px; border-radius: 24px; width: 450px; text-align: center; }
         .modal-box textarea { width: 100%; height: 120px; border-radius: 12px; border: 1px solid #ddd; padding: 15px; margin: 20px 0; outline: none; resize: none; }
 
+        .nav-link .lock-icon {
+                    margin-left: auto;
+                    font-size: 12px;
+                    opacity: 0.6;
+                }
+
+        #locked-view {
+            flex-grow: 1;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 20px;
+            min-height: 70vh;
+            margin-top: 10px;
+        }
+        .locked-icon-big {
+            font-size: 120px;
+            color: #4b5563;
+        }
+
         .nav-link i {
         width: 20px;
         margin-right: 12px;
@@ -218,19 +238,19 @@
         <div class="logo-area"><img src="/images/logo-jurnalistik.jpg" alt="Logo"></div>
         <nav class="nav-menu">
             <a href="#" class="nav-link">
-                <i class="fa-solid fa-user"></i> Pengguna
+                <i class="fa-solid fa-user"></i> Pengguna <i class="fa-solid fa-lock lock-icon"></i>
             </a>
             <a href="#" class="nav-link">
-                <i class="fa-solid fa-users"></i> Anggota
+                <i class="fa-solid fa-users"></i> Anggota <i class="fa-solid fa-lock lock-icon"></i>
             </a>
             <a href="#" class="nav-link active">
                 <i class="fa-solid fa-newspaper"></i> Artikel
             </a>
             <a href="#" class="nav-link">
-                <i class="fa-solid fa-clipboard-list"></i> Materi
+                <i class="fa-solid fa-clipboard-list"></i> Materi <i class="fa-solid fa-lock lock-icon"></i>
             </a>
             <a href="#" class="nav-link">
-                <i class="fa-solid fa-image"></i> Hasil karya
+                <i class="fa-solid fa-image"></i> Hasil karya <i class="fa-solid fa-lock lock-icon"></i>
             </a>
         </nav>
         <div class="logout-area">
@@ -286,6 +306,14 @@
             </div>
         </div>
     </div>
+
+            <div id="locked-view">
+            <div style="text-align: center;">
+                <i class="fa-solid fa-lock locked-icon-big"></i>
+                <h2 style="margin-top: 20px; color: #4b5563;">Akses Terbatas</h2>
+                <p style="color: #6b7280;">Hanya Administrator yang dapat mengakses halaman ini.</p>
+            </div>
+    </div>
     </main>
 </div>
 
@@ -310,7 +338,6 @@
         </div>
     </div>
 </div>
-
 <script>
     const BASE_URL = 'http://127.0.0.1:8000/api';
     const API_URL = `${BASE_URL}/articles`;
@@ -568,6 +595,36 @@ document.querySelectorAll('.nav-link').forEach(link => {
     link.addEventListener('click', () => {
         if (window.innerWidth <= 768) {
             toggleSidebar();
+        }
+    });
+});
+
+function switchView(viewId) {
+    const views = ['dashboard-view', 'detail-view', 'locked-view'];
+
+    views.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.style.display = (id === viewId) ? (id === 'locked-view' ? 'flex' : 'block') : 'none';
+        }
+    });
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+    });
+}
+
+document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', (e) => {
+        const text = link.innerText.trim().toLowerCase();
+
+        if (text.includes('artikel')) {
+            switchView('dashboard-view');
+            link.classList.add('active');
+            loadArticles(activeStatus);
+        } else if (link.querySelector('.lock-icon')) {
+            switchView('locked-view');
+            link.classList.add('active');
         }
     });
 });
